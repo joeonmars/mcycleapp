@@ -1,15 +1,15 @@
-var _ = require( 'underscore' );
-var path = require( 'path' );
+var logger = require( 'morgan' );
 var cookieParser = require( 'cookie-parser' );
+var bodyParser = require( 'body-parser' );
 var express = require( 'express' );
 var session = require( 'express-session' );
-var favicon = require( 'serve-favicon' );
-var routes = require( './server/routes' );
-var dataSync = require( './server/helpers/datasync' )();
-var Events = require( './server/helpers/events' );
-var chat = require( './server/services/chat' )();
-var submissionReceiver = require( './server/services/submissionreceiver' )();
-var basicAuth = require( 'basic-auth' );
+var passport = require( 'passport' );
+var LocalStrategy = require( 'passport-local' );
+var db = require( './db' );
+
+// reference
+// https://orchestrate.io/blog/2014/06/26/build-user-authentication-with-node-js-express-passport-and-orchestrate/
+// http://passportjs.org/docs
 
 // parse params
 var argv = require( 'optimist' )
@@ -20,115 +20,113 @@ var argv = require( 'optimist' )
 	} )
 	.argv;
 
+
 // configure app
 var app = express();
 
-app.set( 'views', path.join( __dirname, 'server/react' ) );
-app.set( 'view engine', 'jsx' );
-app.engine( 'jsx', require( 'express-react-views' ).createEngine() );
+app.use( logger( 'combined' ) );
 
 app.use( cookieParser() );
 
-app.use( session( {
-	secret: 'andys top secret',
-	resave: false,
-	saveUninitialized: false,
-	cookie: {
-		maxAge: 60000
-	}
+app.use( bodyParser.urlencoded( {
+	extended: false
 } ) );
 
-app.use( '/', express.static( path.join( __dirname, '/public' ) ) );
-app.use( '/server', express.static( path.join( __dirname, '/server/assets' ) ) );
+app.use( bodyParser.json() );
 
-var _favicon = favicon( 'public/images/misc/favicon.ico' );
-app.use( _favicon );
+app.use( session( {
+	secret: 'abigsecret',
+	resave: true,
+	saveUninitialized: true
+} ) );
 
-var auth = function( req, res, next ) {
-	function unauthorized( res ) {
-		res.set( 'WWW-Authenticate', 'Basic realm=Authorization Required' );
-		return res.sendStatus( 401 );
-	};
 
-	var user = basicAuth( req );
+// set up the routes
+app.get( '/', function( req, res ) {
+	res.send( 'hello, world!' )
+} );
 
-	if ( !user || !user.name || !user.pass ) {
-		return unauthorized( res );
-	};
+app.post( '/signup', passport.authenticate( 'signup' ), function( req, res ) {
+	console.log( req, res );
+} );
 
-	if ( user.name === 'admin' && user.pass === 'kf6PSCgywYS5rBtN' ) {
-		return next();
-	} else {
-		return unauthorized( res );
-	};
-};
+app.post( '/signin', passport.authenticate( 'signin' ), function( req, res ) {
+	console.log( req, res );
+} );
 
-// client routes
-app.get( '/', routes.index );
-app.get( '/share/:share_id', routes.share );
-app.get( '/data', auth, routes.dataDisplay );
-app.get( '/unsupported', routes.unsupported );
-app.get( '/notfound', routes.notfound );
+app.get( '/logout', function( req, res ) {
+	var name = req.user.username;
+	console.log( 'LOGGED OUT ' + req.user.username );
 
-// endpoint routes
-app.get( '/tweet/:id', routes.tweet ); //http://localhost:3010/tweet/561195366667005952
-app.get( '/instagram/:shortcode', routes.instagram ); //http://localhost:3010/instagram/8zLY9zRBqpAoQDsB_ucxRaAzLtT_Uf3NhoUqw0
-app.get( '/flickr/:id', routes.flickr ); //http://localhost:3010/flickr/20930686089
-app.get( '/soundcloud/:track', routes.soundCloud ); //http://localhost:3010/soundcloud/mylove
-app.get( '/youtube/poster/:id', routes.youtubePoster ); //http://localhost:3010/youtube/poster/PfuzjAXfeio
-app.get( '/giphy/id/:id', routes.giphy ); //http://localhost:3010/giphy/id/3oEdv0DUQOagqEI30k
-app.get( '/giphy/trending/:limit?', routes.giphyTrending ); //http://localhost:3010/giphy/trending/10
-app.get( '/giphy/phrase/:phrase/:limit?', routes.giphyPhrase ); //http://localhost:3010/giphy/phrase/burger/10
-
-// error routes
-app.get( '*', function( req, res, next ) {
-	var err = new Error();
-	err.status = 404;
-	next( err );
+	req.logout();
+	res.redirect( '/' );
+	req.session.notice = 'You have successfully been logged out ' + name;
 } );
 
 
-// handling 404 errors
-app.use( function( err, req, res, next ) {
-	if ( err.status !== 404 ) {
-		return next();
+// define passport strategy
+// Use the LocalStrategy within Passport to login users.
+passport.use( 'signin', new LocalStrategy( {
+		passReqToCallback: true
+	},
+	function( req, email, password, done ) {
+		db.authenticateUser( email, password,
+			function( user ) {
+
+				done( null, user );
+
+				console.log( 'LOGGED IN AS: ' + user.email );
+			},
+			function( errorMessage ) {
+
+				done( null, false, {
+					message: errorMessage
+				} );
+
+				console.log( 'COULD NOT LOG IN: ' + errorMessage );
+			} );
 	}
+) );
 
-	res.status( 404 ).redirect( '/notfound' );
-} );
+// Use the LocalStrategy within Passport to register users.
+passport.use( 'signup', new LocalStrategy( {
+		passReqToCallback: true
+	},
+	function( req, email, password, done ) {
+		db.registerUser( email, password,
+			function( user ) {
+
+				done( null, user );
+
+				console.log( 'REGISTERED: ' + user.email );
+			},
+			function( err ) {
+
+				var errorMessage = err.errors.email.message;
+
+				done( null, false, {
+					message: errorMessage
+				} );
+
+				console.log( 'COULD NOT REGISTER: ' + errorMessage );
+			} );
+	}
+) );
 
 
 // start listening
-var localPort = 3010;
+var localPort = 5000;
 var listeningPort = process.env.PORT || localPort;
-var host = process.env.AWS_HOST || require( 'my-local-ip' )();
-var port = process.env.AWS_PORT || listeningPort;
+var host = process.env.HOST || require( 'my-local-ip' )();
+var port = process.env.PORT || listeningPort;
 
 var onServerStart = function() {
 
 	GLOBAL.SERVER_URL = 'http://' + host + ( port ? ':' + port : '' );
-	GLOBAL.WS_URI = process.env.WS_URI || GLOBAL.SERVER_URL;
-
 	console.log( 'Server started: ' + GLOBAL.SERVER_URL );
 
-	// start DB connection
 	var useLocalDB = ( listeningPort === localPort );
-
-	if ( useLocalDB && argv.mongolab === 'true' ) {
-		useLocalDB = false;
-	}
-
-	var reseed = ( argv.reseed === 'true' );
-	var reseedFromSheet = ( reseed && argv.fromsheet === 'true' );
-
-	dataSync.start( useLocalDB, reseed, reseedFromSheet );
-
-	// start io and event handlings
-	var io = require( 'socket.io' ).listen( server );
-
-	// init services dependent on socket.io
-	submissionReceiver.start( io );
-	chat.start( io );
+	db.start( useLocalDB );
 };
 
 var server = app.listen( listeningPort, onServerStart );

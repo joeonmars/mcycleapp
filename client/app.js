@@ -12,13 +12,14 @@ var App = React.createClass( {
 
 	getInitialState: function() {
 		return {
-			bounceValue: new Animated.Value( 1 ),
-			xValue: new Animated.Value( 0 )
+			//bounceValue: new Animated.Value( 1 ),
+			//xValue: new Animated.Value( 0 )
 		};
 	},
 
 	componentDidMount: function() {
 
+		/*
 		this.state.bounceValue.setValue( 1.2 );
 
 		Animated.spring(
@@ -37,15 +38,61 @@ var App = React.createClass( {
 				friction: 1,
 			}
 		).start();
+*/
+	},
+
+	onClickSignUp: function() {
+
+		fetch( 'http://localhost:5000/signup', {
+				method: 'POST',
+				body: JSON.stringify( {
+					email: 'fdz1@sina.com',
+					password: '12121212'
+				} )
+			} )
+			.then( function( user ) {
+				console.log( user );
+			} )
+			.fail( function( err ) {
+				console.log( err );
+			} )
+			.done();
+	},
+
+	onClickSignIn: function() {
+
+		fetch( 'http://localhost:5000/signin', {
+				method: 'POST',
+				body: JSON.stringify( {
+					email: 'fdz1@sina.com',
+					password: '12121212'
+				} )
+			} )
+			.then( function( user ) {
+				console.log( user );
+			} )
+			.fail( function( err ) {
+				console.log( err );
+			} )
+			.done();
 	},
 
 	render: function() {
 
 		return (
 			<View style={styles.main}>
-				<Animated.View style={[styles.view, {transform: [{scale: this.state.bounceValue}, {translateX: this.state.xValue}]}]}>
+				{/*<Animated.View style={[styles.view, {transform: [{scale: this.state.bounceValue}, {translateX: this.state.xValue}]}]}>
 					<Text>Hello World!</Text>
-				</Animated.View>
+				</Animated.View>*/}
+
+				<TouchableHighlight onPress={this.onClickSignUp}>
+                    <Text>SignUp</Text>
+                </TouchableHighlight>
+
+				<TouchableHighlight onPress={this.onClickSignIn}>
+                    <Text>SignIn</Text>
+                </TouchableHighlight>
+
 			</View>
 		);
 	}
@@ -59,8 +106,8 @@ var styles = StyleSheet.create( {
 		alignItems: 'center',
 	},
 	view: {
-		width: DEVICE_WIDTH / 2,
-		height: DEVICE_WIDTH / 2,
+		width: DEVICE_WIDTH / 3,
+		height: DEVICE_WIDTH / 3,
 		backgroundColor: 'red'
 	}
 } );
