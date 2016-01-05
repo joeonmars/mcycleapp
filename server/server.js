@@ -3,6 +3,7 @@ var cookieParser = require( 'cookie-parser' );
 var bodyParser = require( 'body-parser' );
 var express = require( 'express' );
 var session = require( 'express-session' );
+var cors = require( 'cors' );
 var passport = require( 'passport' );
 var LocalStrategy = require( 'passport-local' );
 var db = require( './db' );
@@ -24,15 +25,12 @@ var argv = require( 'optimist' )
 // configure app
 var app = express();
 
-app.use( logger( 'combined' ) );
+//app.use( logger( 'combined' ) );
 
 app.use( cookieParser() );
-
-app.use( bodyParser.urlencoded( {
-	extended: false
-} ) );
-
 app.use( bodyParser.json() );
+
+app.use( cors() );
 
 app.use( session( {
 	secret: 'abigsecret',
@@ -40,33 +38,15 @@ app.use( session( {
 	saveUninitialized: true
 } ) );
 
-
-// set up the routes
-app.get( '/', function( req, res ) {
-	res.send( 'hello, world!' )
-} );
-
-app.post( '/signup', passport.authenticate( 'signup' ), function( req, res ) {
-	console.log( req, res );
-} );
-
-app.post( '/signin', passport.authenticate( 'signin' ), function( req, res ) {
-	console.log( req, res );
-} );
-
-app.get( '/logout', function( req, res ) {
-	var name = req.user.username;
-	console.log( 'LOGGED OUT ' + req.user.username );
-
-	req.logout();
-	res.redirect( '/' );
-	req.session.notice = 'You have successfully been logged out ' + name;
-} );
+app.use( passport.initialize() );
+app.use( passport.session() );
 
 
 // define passport strategy
 // Use the LocalStrategy within Passport to login users.
 passport.use( 'signin', new LocalStrategy( {
+		usernameField: 'email',
+		passwordField: 'password',
 		passReqToCallback: true
 	},
 	function( req, email, password, done ) {
@@ -90,6 +70,8 @@ passport.use( 'signin', new LocalStrategy( {
 
 // Use the LocalStrategy within Passport to register users.
 passport.use( 'signup', new LocalStrategy( {
+		usernameField: 'email',
+		passwordField: 'password',
 		passReqToCallback: true
 	},
 	function( req, email, password, done ) {
@@ -112,6 +94,62 @@ passport.use( 'signup', new LocalStrategy( {
 			} );
 	}
 ) );
+
+
+// set up the routes
+app.get( '/', function( req, res ) {
+	res.send( 'hello, world!' )
+} );
+
+app.post( '/signup', function( req, res, next ) {
+
+	passport.authenticate( 'signup', function( err, user, info ) {
+
+		if ( err ) {
+
+			return next( err );
+		}
+
+		if ( !user ) {
+
+			return res.status( 401 ).type( 'text/plain' ).send( info.message );
+
+		} else {
+
+			return res.send( user );
+		}
+
+	} )( req, res, next );
+} );
+
+app.post( '/signin', function( req, res, next ) {
+
+	passport.authenticate( 'signin', function( err, user, info ) {
+
+		if ( err ) {
+
+			return next( err );
+		}
+
+		if ( !user ) {
+
+			return res.status( 401 ).type( 'text/plain' ).send( info.message );
+
+		} else {
+
+			return res.send( user );
+		}
+
+	} )( req, res, next );
+} );
+
+app.get( '/logout', function( req, res ) {
+	//var name = req.user.username;
+	//console.log( 'LOGGED OUT ' + req.user.username );
+
+	req.logout();
+	res.redirect( '/' );
+} );
 
 
 // start listening

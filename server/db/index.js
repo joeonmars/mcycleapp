@@ -39,42 +39,48 @@ function onDBConnected( uri ) {
 };
 
 
-function authenticateUser( email, password, onSuccess, onFailure ) {
+function authenticateUser( email, password, onSuccessCb, onFailureCb ) {
 
 	var conditions = {
 		email: email
 	};
 
-	User.findOne( conditions, 'email password' )
-		.then( function( doc ) {
+	var _onSuccess = function( doc ) {
 
-			if ( bcrypt.compareSync( password, doc.password ) ) {
+		if ( !doc ) {
 
-				console.log( 'PASSWORDS MATCHED' );
-				onSuccess( doc );
+			console.log( 'USER NOT REGISTERED' );
+			onFailureCb( 'user is not registered' );
 
-			} else {
+		} else if ( bcrypt.compareSync( password, doc.password ) ) {
 
-				console.log( 'PASSWORDS NOT MATCH' );
-				onFailure( 'incorrect password' );
-			}
+			console.log( 'PASSWORDS MATCHED' );
+			onSuccessCb( doc );
 
-		} )
-		.fail( function() {
+		} else {
 
-			onFailure( 'email not found' );
-		} );
+			console.log( 'PASSWORDS NOT MATCH' );
+			onFailureCb( 'incorrect password' );
+		}
+	};
+
+	var _onFailure = function() {
+
+		onFailureCb( 'Encountered an error while finding user %s in DB', email );
+	};
+
+	User.findOne( conditions, 'email password' ).then( _onSuccess, _onFailure );
 };
 
 
-function registerUser( email, password, onSuccess, onFailure ) {
+function registerUser( email, password, onSuccessCb, onFailureCb ) {
 
 	var doc = {
 		email: email,
 		password: bcrypt.hashSync( password, 8 )
 	};
 
-	User.create( doc ).then( onSuccess ).fail( onFailure );
+	User.create( doc ).then( onSuccessCb, onFailureCb );
 };
 
 

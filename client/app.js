@@ -4,6 +4,7 @@ var Text = React.Text;
 var StyleSheet = React.StyleSheet;
 var Dimensions = React.Dimensions;
 var Animated = React.Animated;
+var TouchableHighlight = React.TouchableHighlight;
 
 var DEVICE_WIDTH = Dimensions.get( 'window' ).width;
 
@@ -43,38 +44,66 @@ var App = React.createClass( {
 
 	onClickSignUp: function() {
 
-		fetch( 'http://localhost:5000/signup', {
+		fetch( 'http://192.168.1.6:5000/signup', {
 				method: 'POST',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
 				body: JSON.stringify( {
-					email: 'fdz1@sina.com',
+					email: 'yueinteractive@gmail.com',
 					password: '12121212'
-				} )
+				} ),
+				credentials: 'include'
 			} )
-			.then( function( user ) {
-				console.log( user );
+			.then( function( res ) {
+				if ( res.ok ) {
+					return Promise.resolve( res );
+				} else {
+					return Promise.reject( new Error( res._bodyText ) );
+				}
 			} )
-			.fail( function( err ) {
-				console.log( err );
+			.then( function( res ) {
+				return res.json();
 			} )
-			.done();
+			.then( function( json ) {
+				console.log( json );
+			} )
+			.catch( function( err ) {
+				console.log( err.message );
+			} );
 	},
 
 	onClickSignIn: function() {
 
-		fetch( 'http://localhost:5000/signin', {
+		fetch( 'http://192.168.1.6:5000/signin', {
 				method: 'POST',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
 				body: JSON.stringify( {
-					email: 'fdz1@sina.com',
+					email: 'yueinteractive@gmail.com',
 					password: '12121212'
-				} )
+				} ),
+				credentials: 'include'
 			} )
-			.then( function( user ) {
-				console.log( user );
+			.then( function( res ) {
+				if ( res.ok ) {
+					return Promise.resolve( res );
+				} else {
+					return Promise.reject( new Error( res._bodyText ) );
+				}
 			} )
-			.fail( function( err ) {
-				console.log( err );
+			.then( function( res ) {
+				return res.json();
 			} )
-			.done();
+			.then( function( json ) {
+				console.log( json );
+			} )
+			.catch( function( err ) {
+				console.log( err.message );
+			} );
 	},
 
 	render: function() {
