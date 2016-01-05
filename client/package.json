@@ -6,6 +6,9 @@
     "start": "react-native start"
   },
   "dependencies": {
-    "react-native": "^0.17.0"
+    "react-native": "^0.17.0",
+    "react-native-fbsdkcore": "0.0.7",
+    "react-native-fbsdklogin": "0.0.7",
+    "react-native-form": "^0.1.6"
   }
 }

@@ -1,3 +1,4 @@
+var _ = require( 'underscore' );
 var bcrypt = require( 'bcryptjs' );
 var seeder = require( 'mongoose-seeder' );
 
@@ -39,7 +40,7 @@ function onDBConnected( uri ) {
 };
 
 
-function authenticateUser( email, password, onSuccessCb, onFailureCb ) {
+function authenticateUser( email, password, via, onSuccessCb, onFailureCb ) {
 
 	var conditions = {
 		email: email
@@ -51,6 +52,11 @@ function authenticateUser( email, password, onSuccessCb, onFailureCb ) {
 
 			console.log( 'USER NOT REGISTERED' );
 			onFailureCb( 'user is not registered' );
+
+		} else if ( via !== 'local' ) {
+
+			console.log( 'NO PASSWORD REQUIRED FOR ' + via );
+			onSuccessCb( doc );
 
 		} else if ( bcrypt.compareSync( password, doc.password ) ) {
 
@@ -73,12 +79,19 @@ function authenticateUser( email, password, onSuccessCb, onFailureCb ) {
 };
 
 
-function registerUser( email, password, onSuccessCb, onFailureCb ) {
+function registerUser( email, password, via, onSuccessCb, onFailureCb ) {
 
 	var doc = {
 		email: email,
-		password: bcrypt.hashSync( password, 8 )
+		via: via
 	};
+
+	if ( via === 'local' ) {
+
+		_.extend( doc, {
+			password: bcrypt.hashSync( password, 8 )
+		} );
+	}
 
 	User.create( doc ).then( onSuccessCb, onFailureCb );
 };

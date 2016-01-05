@@ -3,56 +3,39 @@ var View = React.View;
 var Text = React.Text;
 var StyleSheet = React.StyleSheet;
 var Dimensions = React.Dimensions;
-var Animated = React.Animated;
-var TouchableHighlight = React.TouchableHighlight;
+var TextInput = React.TextInput;
+var TouchableOpacity = React.TouchableOpacity;
+
+var Form = require( 'react-native-form' );
 
 var DEVICE_WIDTH = Dimensions.get( 'window' ).width;
+
+// keyboard reference: https://medium.com/man-moon/writing-modern-react-native-ui-e317ff956f02#.vq0c5lgnx
 
 
 var App = React.createClass( {
 
 	getInitialState: function() {
-		return {
-			//bounceValue: new Animated.Value( 1 ),
-			//xValue: new Animated.Value( 0 )
-		};
+		return {};
 	},
 
 	componentDidMount: function() {
 
-		/*
-		this.state.bounceValue.setValue( 1.2 );
-
-		Animated.spring(
-			this.state.bounceValue, {
-				toValue: 1,
-				friction: 1,
-			}
-		).start();
-
-
-		this.state.xValue.setValue( 200 );
-
-		Animated.spring(
-			this.state.xValue, {
-				toValue: 0,
-				friction: 1,
-			}
-		).start();
-*/
 	},
 
 	onClickSignUp: function() {
 
-		fetch( 'http://192.168.1.6:5000/signup', {
+		var inputVals = this.refs.signUpForm.getValues();
+
+		fetch( 'http://localhost:5000/signup', {
 				method: 'POST',
 				headers: {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify( {
-					email: 'yueinteractive@gmail.com',
-					password: '12121212'
+					email: inputVals.email,
+					password: inputVals.password
 				} ),
 				credentials: 'include'
 			} )
@@ -76,15 +59,17 @@ var App = React.createClass( {
 
 	onClickSignIn: function() {
 
-		fetch( 'http://192.168.1.6:5000/signin', {
+		var inputVals = this.refs.signInForm.getValues();
+
+		fetch( 'http://localhost:5000/signin', {
 				method: 'POST',
 				headers: {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify( {
-					email: 'yueinteractive@gmail.com',
-					password: '12121212'
+					email: inputVals.email,
+					password: inputVals.password
 				} ),
 				credentials: 'include'
 			} )
@@ -106,21 +91,54 @@ var App = React.createClass( {
 			} );
 	},
 
+	onClickSignOut: function() {
+
+		fetch( 'http://localhost:5000/signout', {
+			method: 'GET'
+		} );
+	},
+
 	render: function() {
 
 		return (
 			<View style={styles.main}>
-				{/*<Animated.View style={[styles.view, {transform: [{scale: this.state.bounceValue}, {translateX: this.state.xValue}]}]}>
-					<Text>Hello World!</Text>
-				</Animated.View>*/}
 
-				<TouchableHighlight onPress={this.onClickSignUp}>
-                    <Text>SignUp</Text>
-                </TouchableHighlight>
+				<View style={styles.modal}>
+					<Form ref='signUpForm'>
+						<TextInput style={styles.textInput}
+							name='email' placeholder='Email Address'
+							autoCapitalize='none' autoCorrect={false} keyboardType='email-address' />
 
-				<TouchableHighlight onPress={this.onClickSignIn}>
-                    <Text>SignIn</Text>
-                </TouchableHighlight>
+						<TextInput style={styles.textInput}
+							name='password' placeholder='Password'
+							autoCapitalize='none' autoCorrect={false} keyboardType='ascii-capable' secureTextEntry={true} />
+					</Form>
+
+					<TouchableOpacity style={styles.button} onPress={this.onClickSignUp}>
+	                    <Text>Sign Up</Text>
+	                </TouchableOpacity>
+                </View>
+
+
+                <View style={styles.modal}>
+					<Form ref='signInForm'>
+						<TextInput style={styles.textInput}
+							name='email' placeholder='Email Address'
+							autoCapitalize='none' autoCorrect={false} keyboardType='email-address' />
+
+						<TextInput style={styles.textInput}
+							name='password' placeholder='Password'
+							autoCapitalize='none' autoCorrect={false} keyboardType='ascii-capable' secureTextEntry={true} />
+					</Form>
+
+					<TouchableOpacity style={styles.button} onPress={this.onClickSignIn}>
+	                    <Text>Sign In</Text>
+	                </TouchableOpacity>
+                 </View>
+
+				<TouchableOpacity style={styles.button} onPress={this.onClickSignOut}>
+                    <Text>Sign Out</Text>
+                </TouchableOpacity>
 
 			</View>
 		);
@@ -138,6 +156,30 @@ var styles = StyleSheet.create( {
 		width: DEVICE_WIDTH / 3,
 		height: DEVICE_WIDTH / 3,
 		backgroundColor: 'red'
+	},
+	button: {
+		alignSelf: 'center',
+		marginTop: 5,
+		paddingHorizontal: 6,
+		paddingVertical: 3,
+		borderColor: '#000',
+		borderWidth: 1
+	},
+	textInput: {
+		alignSelf: 'center',
+		width: 200,
+		height: 30,
+		fontSize: 14,
+		padding: 7,
+		margin: 2,
+		borderColor: '#dfdfdf',
+		borderWidth: 1
+	},
+	modal: {
+		margin: 10,
+		padding: 10,
+		borderColor: '#dfdfdf',
+		borderWidth: 1
 	}
 } );
 

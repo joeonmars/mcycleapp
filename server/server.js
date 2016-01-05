@@ -42,15 +42,37 @@ app.use( passport.initialize() );
 app.use( passport.session() );
 
 
+// Passport session setup.
+passport.serializeUser( function( user, done ) {
+	done( null, user );
+} );
+
+passport.deserializeUser( function( user, done ) {
+	done( null, user );
+} );
+
+var ensureAuthenticated = function( req, res, next ) {
+
+	if ( req.isAuthenticated() ) {
+
+		return next();
+
+	} else {
+
+		return res.status( 401 ).send( 'unautorized' );
+	}
+};
+
+
 // define passport strategy
 // Use the LocalStrategy within Passport to login users.
-passport.use( 'signin', new LocalStrategy( {
+passport.use( 'signin-local', new LocalStrategy( {
 		usernameField: 'email',
-		passwordField: 'password',
-		passReqToCallback: true
+		passwordField: 'password'
 	},
-	function( req, email, password, done ) {
-		db.authenticateUser( email, password,
+	function( email, password, done ) {
+
+		db.authenticateUser( email, password, 'local',
 			function( user ) {
 
 				done( null, user );
@@ -69,28 +91,28 @@ passport.use( 'signin', new LocalStrategy( {
 ) );
 
 // Use the LocalStrategy within Passport to register users.
-passport.use( 'signup', new LocalStrategy( {
+passport.use( 'signup-local', new LocalStrategy( {
 		usernameField: 'email',
-		passwordField: 'password',
-		passReqToCallback: true
+		passwordField: 'password'
 	},
-	function( req, email, password, done ) {
-		db.registerUser( email, password,
+	function( email, password, done ) {
+
+		db.registerUser( email, password, 'local',
 			function( user ) {
 
-				done( null, user );
-
 				console.log( 'REGISTERED: ' + user.email );
+
+				done( null, user );
 			},
 			function( err ) {
 
 				var errorMessage = err.errors.email.message;
 
+				console.log( 'COULD NOT REGISTER: ' + errorMessage );
+
 				done( null, false, {
 					message: errorMessage
 				} );
-
-				console.log( 'COULD NOT REGISTER: ' + errorMessage );
 			} );
 	}
 ) );
@@ -103,7 +125,7 @@ app.get( '/', function( req, res ) {
 
 app.post( '/signup', function( req, res, next ) {
 
-	passport.authenticate( 'signup', function( err, user, info ) {
+	passport.authenticate( 'signup-local', function( err, user, info ) {
 
 		if ( err ) {
 
@@ -112,9 +134,21 @@ app.post( '/signup', function( req, res, next ) {
 
 		if ( !user ) {
 
-			return res.status( 401 ).type( 'text/plain' ).send( info.message );
+			return res.status( 401 ).send( info.message );
 
 		} else {
+
+			req.login( user, function( err ) {
+
+				if ( err ) {
+
+					return next( err );
+
+				} else {
+
+					return res.send( user );
+				}
+			} );
 
 			return res.send( user );
 		}
@@ -124,7 +158,7 @@ app.post( '/signup', function( req, res, next ) {
 
 app.post( '/signin', function( req, res, next ) {
 
-	passport.authenticate( 'signin', function( err, user, info ) {
+	passport.authenticate( 'signin-local', function( err, user, info ) {
 
 		if ( err ) {
 
@@ -133,9 +167,21 @@ app.post( '/signin', function( req, res, next ) {
 
 		if ( !user ) {
 
-			return res.status( 401 ).type( 'text/plain' ).send( info.message );
+			return res.status( 401 ).send( info.message );
 
 		} else {
+
+			req.login( user, function( err ) {
+
+				if ( err ) {
+
+					return next( err );
+
+				} else {
+
+					return res.send( user );
+				}
+			} );
 
 			return res.send( user );
 		}
@@ -143,12 +189,12 @@ app.post( '/signin', function( req, res, next ) {
 	} )( req, res, next );
 } );
 
-app.get( '/logout', function( req, res ) {
-	//var name = req.user.username;
-	//console.log( 'LOGGED OUT ' + req.user.username );
+app.get( '/signout', ensureAuthenticated, function( req, res ) {
+
+	console.log( 'LOGGED OUT ' + req.user.email );
 
 	req.logout();
-	res.redirect( '/' );
+	res.status( 401 ).send( 'logged out' );
 } );
 
 
