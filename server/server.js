@@ -123,7 +123,7 @@ app.get( '/', function( req, res ) {
 	res.send( 'hello, world!' )
 } );
 
-app.post( '/signup', function( req, res, next ) {
+app.post( '/signup-local', function( req, res, next ) {
 
 	passport.authenticate( 'signup-local', function( err, user, info ) {
 
@@ -156,7 +156,7 @@ app.post( '/signup', function( req, res, next ) {
 	} )( req, res, next );
 } );
 
-app.post( '/signin', function( req, res, next ) {
+app.post( '/signin-local', function( req, res, next ) {
 
 	passport.authenticate( 'signin-local', function( err, user, info ) {
 

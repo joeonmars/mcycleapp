@@ -8,10 +8,16 @@ var TouchableOpacity = React.TouchableOpacity;
 
 var Form = require( 'react-native-form' );
 
+var FBSDKLogin = require( 'react-native-fbsdklogin' );
+var FBSDKLoginButton = FBSDKLogin.FBSDKLoginButton;
+
+var FBSDKCore = require( 'react-native-fbsdkcore' );
+var FBSDKGraphRequest = FBSDKCore.FBSDKGraphRequest;
+
 var DEVICE_WIDTH = Dimensions.get( 'window' ).width;
 
 // keyboard reference: https://medium.com/man-moon/writing-modern-react-native-ui-e317ff956f02#.vq0c5lgnx
-
+// Facebook App: https://developers.facebook.com/apps/434792680058057/dashboard/
 
 var App = React.createClass( {
 
@@ -23,19 +29,17 @@ var App = React.createClass( {
 
 	},
 
-	onClickSignUp: function() {
+	signUp: function( email, password, via ) {
 
-		var inputVals = this.refs.signUpForm.getValues();
-
-		fetch( 'http://localhost:5000/signup', {
+		fetch( 'http://localhost:5000/signup-' + via, {
 				method: 'POST',
 				headers: {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify( {
-					email: inputVals.email,
-					password: inputVals.password
+					email: email,
+					password: password
 				} ),
 				credentials: 'include'
 			} )
@@ -55,47 +59,93 @@ var App = React.createClass( {
 			.catch( function( err ) {
 				console.log( err.message );
 			} );
+	},
+
+	signIn: function( email, password, via ) {
+
+		fetch( 'http://localhost:5000/signin-' + via, {
+				method: 'POST',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify( {
+					email: email,
+					password: password
+				} ),
+				credentials: 'include'
+			} )
+			.then( function( res ) {
+				if ( res.ok ) {
+					return Promise.resolve( res );
+				} else {
+					return Promise.reject( new Error( res._bodyText ) );
+				}
+			} )
+			.then( function( res ) {
+				return res.json();
+			} )
+			.then( function( json ) {
+				console.log( json );
+			} )
+			.catch( function( err ) {
+				console.log( err.message );
+			} );
+	},
+
+	signOut: function() {
+
+		fetch( 'http://localhost:5000/signout', {
+			method: 'GET'
+		} );
+	},
+
+	onClickSignUp: function() {
+
+		var inputVals = this.refs.signUpForm.getValues();
+
+		this.signUp( inputVals.email, inputVals.password, 'local' );
 	},
 
 	onClickSignIn: function() {
 
 		var inputVals = this.refs.signInForm.getValues();
 
-		fetch( 'http://localhost:5000/signin', {
-				method: 'POST',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify( {
-					email: inputVals.email,
-					password: inputVals.password
-				} ),
-				credentials: 'include'
-			} )
-			.then( function( res ) {
-				if ( res.ok ) {
-					return Promise.resolve( res );
-				} else {
-					return Promise.reject( new Error( res._bodyText ) );
-				}
-			} )
-			.then( function( res ) {
-				return res.json();
-			} )
-			.then( function( json ) {
-				console.log( json );
-			} )
-			.catch( function( err ) {
-				console.log( err.message );
-			} );
+		this.signIn( inputVals.email, inputVals.password, 'local' );
 	},
 
-	onClickSignOut: function() {
+	onFBLoginFinished: function( err, result ) {
 
-		fetch( 'http://localhost:5000/signout', {
-			method: 'GET'
-		} );
+		if ( !err && !result.isCancelled ) {
+
+			var graphPath = '/me';
+
+			var params = {
+				fields: {
+					string: 'email'
+				}
+			};
+
+			var fetchUserRequest = new FBSDKGraphRequest( function( error, result ) {
+
+				if ( error ) {
+
+					alert( 'Error logging in Facebook.' );
+
+				} else {
+
+					this.signIn( result.email, '', 'facebook' );
+				}
+
+			}.bind( this ), graphPath, params );
+
+			fetchUserRequest.start();
+		}
+	},
+
+	onFBLogoutFinished: function() {
+
+		//this.signOut();
 	},
 
 	render: function() {
@@ -134,9 +184,15 @@ var App = React.createClass( {
 					<TouchableOpacity style={styles.button} onPress={this.onClickSignIn}>
 	                    <Text>Sign In</Text>
 	                </TouchableOpacity>
+
+	                <FBSDKLoginButton style={styles.fbButton}
+	                	onLoginFinished={this.onFBLoginFinished}
+          				onLogoutFinished={this.onFBLogoutFinished}
+          				readPermissions={['email']}
+          				publishPermissions={[]}/>
                  </View>
 
-				<TouchableOpacity style={styles.button} onPress={this.onClickSignOut}>
+				<TouchableOpacity style={styles.button} onPress={this.signOut}>
                     <Text>Sign Out</Text>
                 </TouchableOpacity>
 
@@ -164,6 +220,12 @@ var styles = StyleSheet.create( {
 		paddingVertical: 3,
 		borderColor: '#000',
 		borderWidth: 1
+	},
+	fbButton: {
+		alignSelf: 'center',
+		marginTop: 5,
+		width: 150,
+		height: 30
 	},
 	textInput: {
 		alignSelf: 'center',
