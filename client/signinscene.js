@@ -1,10 +1,14 @@
 var React = require( 'react-native' );
-var View = React.View;
-var Text = React.Text;
-var StyleSheet = React.StyleSheet;
-var Dimensions = React.Dimensions;
-var TextInput = React.TextInput;
-var TouchableOpacity = React.TouchableOpacity;
+
+var {
+	Text,
+	StyleSheet,
+	Navigator,
+	Dimensions,
+	TextInput,
+	TouchableOpacity,
+	View,
+} = React;
 
 var Form = require( 'react-native-form' );
 
@@ -19,7 +23,7 @@ var DEVICE_WIDTH = Dimensions.get( 'window' ).width;
 // keyboard reference: https://medium.com/man-moon/writing-modern-react-native-ui-e317ff956f02#.vq0c5lgnx
 // Facebook App: https://developers.facebook.com/apps/434792680058057/dashboard/
 
-var App = React.createClass( {
+var SignInScene = React.createClass( {
 
 	getInitialState: function() {
 		return {};
@@ -90,9 +94,13 @@ var App = React.createClass( {
 				return res.json();
 			} )
 			.then( function( json ) {
+
 				console.log( json );
-			} )
+				this.gotoMainScene();
+
+			}.bind( this ) )
 			.catch( function( err ) {
+
 				console.log( err.message );
 			} );
 	},
@@ -101,6 +109,14 @@ var App = React.createClass( {
 
 		fetch( 'http://localhost:5000/signout', {
 			method: 'GET'
+		} );
+	},
+
+	gotoMainScene: function() {
+
+		this.props.navigator.push( {
+			id: 'main',
+			sceneConfig: Navigator.SceneConfigs.FloatFromRight
 		} );
 	},
 
@@ -254,4 +270,4 @@ var styles = StyleSheet.create( {
 } );
 
 
-module.exports = App;
+module.exports = SignInScene;
