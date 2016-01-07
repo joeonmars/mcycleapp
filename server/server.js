@@ -66,18 +66,17 @@ var ensureAuthenticated = function( req, res, next ) {
 
 // define passport strategy
 // Use the LocalStrategy within Passport to login users.
-passport.use( 'signin-local', new LocalStrategy( {
-		usernameField: 'email',
-		passwordField: 'password'
+passport.use( 'signin', new LocalStrategy( {
+		passReqToCallback: true
 	},
-	function( email, password, done ) {
+	function( req, username, password, done ) {
 
-		db.authenticateUser( email, password, 'local',
+		db.authenticateUser( username, password, req.body.via,
 			function( user ) {
 
 				done( null, user );
 
-				console.log( 'LOGGED IN AS: ' + user.email );
+				console.log( 'LOGGED IN AS: ' + user.username );
 			},
 			function( errorMessage ) {
 
@@ -91,22 +90,21 @@ passport.use( 'signin-local', new LocalStrategy( {
 ) );
 
 // Use the LocalStrategy within Passport to register users.
-passport.use( 'signup-local', new LocalStrategy( {
-		usernameField: 'email',
-		passwordField: 'password'
+passport.use( 'signup', new LocalStrategy( {
+		passReqToCallback: true
 	},
-	function( email, password, done ) {
+	function( req, username, password, done ) {
 
-		db.registerUser( email, password, 'local',
+		db.registerUser( username, password, req.body.email, req.body.via,
 			function( user ) {
 
-				console.log( 'REGISTERED: ' + user.email );
+				console.log( 'REGISTERED: ' + user.username );
 
 				done( null, user );
 			},
 			function( err ) {
 
-				var errorMessage = err.errors.email.message;
+				var errorMessage = err.errors.username.message;
 
 				console.log( 'COULD NOT REGISTER: ' + errorMessage );
 
@@ -117,6 +115,78 @@ passport.use( 'signup-local', new LocalStrategy( {
 	}
 ) );
 
+function passportSignUp( req, res, next ) {
+
+	passport.authenticate( 'signup', function( err, user, info ) {
+
+		if ( err ) {
+
+			return next( err );
+		}
+
+		if ( !user ) {
+
+			return res.status( 401 ).send( info.message );
+
+		} else {
+
+			req.login( user, function( err ) {
+
+				if ( err ) {
+
+					return next( err );
+
+				} else {
+
+					return res.send( user );
+				}
+			} );
+
+			return res.send( user );
+		}
+
+	} )( req, res, next );
+};
+
+function passportSignIn( req, res, next ) {
+
+	passport.authenticate( 'signin', function( err, user, info ) {
+
+		if ( err ) {
+
+			return next( err );
+		}
+
+		if ( !user ) {
+
+			return res.status( 401 ).send( info.message );
+
+		} else {
+
+			req.login( user, function( err ) {
+
+				if ( err ) {
+
+					return next( err );
+
+				} else {
+
+					return res.send( user );
+				}
+			} );
+
+			return res.send( user );
+		}
+
+	} )( req, res, next );
+};
+
+function passportSignOut( req, res ) {
+
+	req.logout();
+	res.status( 401 ).send( 'signed out' );
+};
+
 
 // set up the routes
 app.get( '/', function( req, res ) {
@@ -125,76 +195,41 @@ app.get( '/', function( req, res ) {
 
 app.post( '/signup-local', function( req, res, next ) {
 
-	passport.authenticate( 'signup-local', function( err, user, info ) {
-
-		if ( err ) {
-
-			return next( err );
-		}
-
-		if ( !user ) {
-
-			return res.status( 401 ).send( info.message );
-
-		} else {
-
-			req.login( user, function( err ) {
-
-				if ( err ) {
-
-					return next( err );
-
-				} else {
-
-					return res.send( user );
-				}
-			} );
-
-			return res.send( user );
-		}
-
-	} )( req, res, next );
+	passportSignUp( req, res, next );
 } );
 
 app.post( '/signin-local', function( req, res, next ) {
 
-	passport.authenticate( 'signin-local', function( err, user, info ) {
+	passportSignIn( req, res, next );
+} );
 
-		if ( err ) {
+app.post( '/signin-facebook', function( req, res, next ) {
 
-			return next( err );
-		}
+	var onSuccess = function( doc ) {
 
-		if ( !user ) {
+		if ( !doc ) {
 
-			return res.status( 401 ).send( info.message );
+			passportSignUp( req, res, next );
 
 		} else {
 
-			req.login( user, function( err ) {
-
-				if ( err ) {
-
-					return next( err );
-
-				} else {
-
-					return res.send( user );
-				}
-			} );
-
-			return res.send( user );
+			passportSignIn( req, res, next );
 		}
+	};
 
-	} )( req, res, next );
+	var onFailure = function( err ) {
+
+		res.status( 401 ).send( 'failed to register user from facebook' );
+	};
+
+	db.isRegisteredUser( req.body.username, 'facebook', onSuccess, onFailure );
 } );
 
 app.get( '/signout', ensureAuthenticated, function( req, res ) {
 
-	console.log( 'LOGGED OUT ' + req.user.email );
+	console.log( 'LOGGED OUT ' + req.user.username );
 
-	req.logout();
-	res.status( 401 ).send( 'logged out' );
+	passportSignOut( req, res );
 } );
 
 

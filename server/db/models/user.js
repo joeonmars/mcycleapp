@@ -1,8 +1,12 @@
 var mongoose = require( 'mongoose' );
 
 var schema = new mongoose.Schema( {
+	username: String,
+	password: {
+		type: String,
+		default: ''
+	},
 	email: String,
-	password: String,
 	via: String,
 	timeRegistered: {
 		type: Number,
@@ -11,15 +15,15 @@ var schema = new mongoose.Schema( {
 } );
 
 
-schema.path( 'email' ).validate( function( value, res ) {
+schema.path( 'username' ).validate( function( value, res ) {
 	model.findOne( {
-		email: value
-	}, 'email', function( err, user ) {
+		username: value
+	}, 'username', function( err, user ) {
 		if ( err ) return res( err );
 		if ( user ) return res( false );
 		res( true );
 	} );
-}, 'email already registered' );
+}, 'username already registered' );
 
 
 var model = mongoose.model( 'User', schema, 'users' );

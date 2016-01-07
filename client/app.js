@@ -29,7 +29,7 @@ var App = React.createClass( {
 
 	},
 
-	signUp: function( email, password, via ) {
+	signUp: function( username, password, email, via ) {
 
 		fetch( 'http://localhost:5000/signup-' + via, {
 				method: 'POST',
@@ -38,8 +38,10 @@ var App = React.createClass( {
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify( {
+					username: username,
+					password: password,
 					email: email,
-					password: password
+					via: via
 				} ),
 				credentials: 'include'
 			} )
@@ -61,7 +63,7 @@ var App = React.createClass( {
 			} );
 	},
 
-	signIn: function( email, password, via ) {
+	signIn: function( username, password, email, via ) {
 
 		fetch( 'http://localhost:5000/signin-' + via, {
 				method: 'POST',
@@ -70,8 +72,10 @@ var App = React.createClass( {
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify( {
+					username: username,
+					password: password,
 					email: email,
-					password: password
+					via: via
 				} ),
 				credentials: 'include'
 			} )
@@ -104,14 +108,14 @@ var App = React.createClass( {
 
 		var inputVals = this.refs.signUpForm.getValues();
 
-		this.signUp( inputVals.email, inputVals.password, 'local' );
+		this.signUp( inputVals.email, inputVals.password, inputVals.email, 'local' );
 	},
 
 	onClickSignIn: function() {
 
 		var inputVals = this.refs.signInForm.getValues();
 
-		this.signIn( inputVals.email, inputVals.password, 'local' );
+		this.signIn( inputVals.email, inputVals.password, inputVals.email, 'local' );
 	},
 
 	onFBLoginFinished: function( err, result ) {
@@ -132,9 +136,13 @@ var App = React.createClass( {
 
 					alert( 'Error logging in Facebook.' );
 
+				} else if ( !result.email ) {
+
+					alert( 'Email cannot read.' );
+
 				} else {
 
-					this.signIn( result.email, '', 'facebook' );
+					this.signIn( result.id, ' ', result.email, 'facebook' );
 				}
 
 			}.bind( this ), graphPath, params );
@@ -145,7 +153,7 @@ var App = React.createClass( {
 
 	onFBLogoutFinished: function() {
 
-		//this.signOut();
+		this.signOut();
 	},
 
 	render: function() {

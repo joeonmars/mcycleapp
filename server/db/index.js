@@ -40,48 +40,49 @@ function onDBConnected( uri ) {
 };
 
 
-function authenticateUser( email, password, via, onSuccessCb, onFailureCb ) {
+function authenticateUser( username, password, via, onSuccessCb, onFailureCb ) {
 
 	var conditions = {
-		email: email
+		username: username
 	};
 
 	var _onSuccess = function( doc ) {
 
 		if ( !doc ) {
 
-			console.log( 'USER NOT REGISTERED' );
+			console.log( 'USER %s IS NOT REGISTERED', username );
 			onFailureCb( 'user is not registered' );
 
 		} else if ( via !== 'local' ) {
 
-			console.log( 'NO PASSWORD REQUIRED FOR ' + via );
+			console.log( 'USER %s IS AUTHENTICATED VIA %s, NO PASSWORD REQUIRED', username, via );
 			onSuccessCb( doc );
 
 		} else if ( bcrypt.compareSync( password, doc.password ) ) {
 
-			console.log( 'PASSWORDS MATCHED' );
+			console.log( 'PASSWORDS MATCHED AND USER %s AUTHENTICATED', username );
 			onSuccessCb( doc );
 
 		} else {
 
-			console.log( 'PASSWORDS NOT MATCH' );
+			console.log( 'PASSWORDS DID NOT MATCH' );
 			onFailureCb( 'incorrect password' );
 		}
 	};
 
 	var _onFailure = function() {
 
-		onFailureCb( 'Encountered an error while finding user %s in DB', email );
+		onFailureCb( 'Encountered an error while finding user %s in DB', username );
 	};
 
-	User.findOne( conditions, 'email password' ).then( _onSuccess, _onFailure );
+	User.findOne( conditions, 'username password' ).then( _onSuccess, _onFailure );
 };
 
 
-function registerUser( email, password, via, onSuccessCb, onFailureCb ) {
+function registerUser( username, password, email, via, onSuccessCb, onFailureCb ) {
 
 	var doc = {
+		username: username,
 		email: email,
 		via: via
 	};
@@ -97,7 +98,18 @@ function registerUser( email, password, via, onSuccessCb, onFailureCb ) {
 };
 
 
+function isRegisteredUser( username, via, onSuccessCb, onFailureCb ) {
+
+	var conditions = {
+		username: username,
+		via: via
+	};
+
+	User.findOne( conditions, 'username' ).then( onSuccessCb, onFailureCb );
+};
+
 
 exports.start = start;
 exports.authenticateUser = authenticateUser;
 exports.registerUser = registerUser;
+exports.isRegisteredUser = isRegisteredUser;
