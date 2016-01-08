@@ -11,12 +11,15 @@ var {
 } = React;
 
 var Form = require( 'react-native-form' );
+var Icon = require( './icon' ).Icon;
 
 var FBSDKLogin = require( 'react-native-fbsdklogin' );
 var FBSDKLoginButton = FBSDKLogin.FBSDKLoginButton;
 
 var FBSDKCore = require( 'react-native-fbsdkcore' );
 var FBSDKGraphRequest = FBSDKCore.FBSDKGraphRequest;
+
+var FBLoginManager = require( 'NativeModules' ).FBSDKLoginManager;
 
 var DEVICE_WIDTH = Dimensions.get( 'window' ).width;
 
@@ -26,7 +29,10 @@ var DEVICE_WIDTH = Dimensions.get( 'window' ).width;
 var SignInScene = React.createClass( {
 
 	getInitialState: function() {
-		return {};
+
+		return {
+			user: null
+		};
 	},
 
 	componentDidMount: function() {
@@ -96,6 +102,11 @@ var SignInScene = React.createClass( {
 			.then( function( json ) {
 
 				console.log( json );
+
+				this.setState( {
+					user: json
+				} );
+
 				this.gotoMainScene();
 
 			}.bind( this ) )
@@ -109,7 +120,24 @@ var SignInScene = React.createClass( {
 
 		fetch( 'http://localhost:5000/signout', {
 			method: 'GET'
-		} );
+		} ).then( function( res ) {
+
+			this.setState( {
+				user: null
+			} );
+
+		}.bind( this ) );
+	},
+
+	signInFB: function() {
+
+		FBLoginManager.logInWithReadPermissions( [ 'email' ], this.onFBSignInFinished );
+	},
+
+	signOutFB: function() {
+
+		FBLoginManager.logOut();
+		this.signOut();
 	},
 
 	gotoMainScene: function() {
@@ -134,7 +162,7 @@ var SignInScene = React.createClass( {
 		this.signIn( inputVals.email, inputVals.password, inputVals.email, 'local' );
 	},
 
-	onFBLoginFinished: function( err, result ) {
+	onFBSignInFinished: function( err, result ) {
 
 		if ( !err && !result.isCancelled ) {
 
@@ -167,12 +195,10 @@ var SignInScene = React.createClass( {
 		}
 	},
 
-	onFBLogoutFinished: function() {
-
-		this.signOut();
-	},
-
 	render: function() {
+
+		var fbButtonText = this.state.user ? 'Sign Out from Facebook' : 'Sign In with Facebook';
+		var fbButtonHandler = this.state.user ? this.signOutFB : this.signInFB;
 
 		return (
 			<View style={styles.main}>
@@ -209,11 +235,10 @@ var SignInScene = React.createClass( {
 	                    <Text>Sign In</Text>
 	                </TouchableOpacity>
 
-	                <FBSDKLoginButton style={styles.fbButton}
-	                	onLoginFinished={this.onFBLoginFinished}
-          				onLogoutFinished={this.onFBLogoutFinished}
-          				readPermissions={['email']}
-          				publishPermissions={[]}/>
+					<TouchableOpacity style={styles.fbButton} onPress={fbButtonHandler}>
+						<Icon style={styles.fbButtonIcon} name='facebook' />
+						<Text style={styles.fbButtonText}>{fbButtonText}</Text>
+					</TouchableOpacity>
                  </View>
 
 				<TouchableOpacity style={styles.button} onPress={this.signOut}>
@@ -248,8 +273,21 @@ var styles = StyleSheet.create( {
 	fbButton: {
 		alignSelf: 'center',
 		marginTop: 5,
-		width: 150,
-		height: 30
+		paddingHorizontal: 10,
+		paddingVertical: 8,
+		flex: 1,
+		flexDirection: 'row',
+		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: 'navy'
+	},
+	fbButtonIcon: {
+		fontSize: 12,
+		color: '#fff'
+	},
+	fbButtonText: {
+		fontSize: 10,
+		color: '#fff'
 	},
 	textInput: {
 		alignSelf: 'center',

@@ -184,7 +184,7 @@ function passportSignIn( req, res, next ) {
 function passportSignOut( req, res ) {
 
 	req.logout();
-	res.status( 401 ).send( 'signed out' );
+	res.send( 'signed out' );
 };
 
 

@@ -12,6 +12,7 @@
     "react-native-fbsdkcore": "0.0.7",
     "react-native-fbsdklogin": "0.0.7",
     "react-native-form": "^0.1.6",
+    "react-native-vector-icons": "^1.0.4",
     "underscore": "^1.8.3"
   }
 }
