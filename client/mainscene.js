@@ -84,7 +84,7 @@ var MainScene = React.createClass( {
 		};
 
 		return (
-			<Navigator ref='mainNav' initialRoute={initialRoute} renderScene={this.renderScene} navigationBar={this.renderNavigatorBar()} />
+			<Navigator ref='mainNav' sceneStyle={styles.sceneContainer} initialRoute={initialRoute} renderScene={this.renderScene} navigationBar={this.renderNavigatorBar()} />
 		);
 	}
 } );
@@ -109,6 +109,11 @@ var styles = StyleSheet.create( {
 	navButtonText: {
 		textAlign: 'center',
 		color: '#fff'
+	},
+	sceneContainer: {
+		paddingTop: 30,
+		paddingBottom: 50,
+		backgroundColor: '#fff'
 	}
 } );
 

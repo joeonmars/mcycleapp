@@ -3,21 +3,64 @@ var React = require( 'react-native' );
 var {
 	StyleSheet,
 	View,
+	ScrollView,
 	Text,
 	Dimensions,
 	TouchableOpacity
 } = React;
 
+var DatePicker = require( './datepicker' );
+
 var DEVICE_WIDTH = Dimensions.get( 'window' ).width;
+
 
 var CalendarScene = React.createClass( {
 
+	getDefaultProps: function() {
+
+		return {
+			minCalendar: null,
+			maxCalendar: null
+		};
+	},
+
 	getInitialState: function() {
-		return {};
+
+		return {
+			calendarDates: null
+		};
+	},
+
+	componentWillMount: function() {
+
+		var startDate = new Date();
+		startDate.setDate( 1 );
+		startDate.setMonth( startDate.getMonth() - 12 );
+
+		var calendarDates = [];
+
+		for ( var i = 0; i < 24; i++ ) {
+
+			var date = new Date( startDate );
+			date.setMonth( date.getMonth() + i );
+
+			calendarDates.push( date );
+		}
+
+		this.setState( {
+			calendarDates: calendarDates
+		} );
 	},
 
 	componentDidMount: function() {
 
+	},
+
+	renderCalendar: function( date, i ) {
+
+		return (
+			<DatePicker key={i} year={date.getFullYear()} month={date.getMonth()} />
+		);
 	},
 
 	render: function() {
@@ -25,7 +68,16 @@ var CalendarScene = React.createClass( {
 		return (
 			<View style={styles.main}>
 
-				<Text style={styles.text}>Display Calendar Here</Text>
+				<ScrollView
+					pagingEnabled={true}
+					horizontal={true}
+					showsHorizontalScrollIndicator={false}
+					contentContainerStyle={styles.contentContainer}
+					style={styles.scrollView}>
+
+					{this.state.calendarDates.map(this.renderCalendar)}
+
+				</ScrollView>
 
 			</View>
 		);
@@ -35,14 +87,15 @@ var CalendarScene = React.createClass( {
 
 var styles = StyleSheet.create( {
 	main: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
 		backgroundColor: '#fff'
 	},
-	text: {
-		width: DEVICE_WIDTH / 2,
-		textAlign: 'center'
+	scrollView: {
+		width: DEVICE_WIDTH,
+		height: 300
+	},
+	contentContainer: {
+		flex: 1,
+		alignItems: 'center'
 	}
 } );
 

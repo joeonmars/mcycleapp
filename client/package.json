@@ -6,9 +6,12 @@
     "start": "react-native start"
   },
   "dependencies": {
+    "calendar": "^0.1.0",
+    "moment": "^2.11.0",
     "react-native": "^0.17.0",
     "react-native-fbsdkcore": "0.0.7",
     "react-native-fbsdklogin": "0.0.7",
-    "react-native-form": "^0.1.6"
+    "react-native-form": "^0.1.6",
+    "underscore": "^1.8.3"
   }
 }
