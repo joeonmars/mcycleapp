@@ -10,6 +10,7 @@ var {
 } = React;
 
 var DatePicker = require( './datepicker' );
+var Icon = require( './icon' ).Icon;
 
 var DEVICE_WIDTH = Dimensions.get( 'window' ).width;
 
@@ -27,7 +28,8 @@ var CalendarScene = React.createClass( {
 	getInitialState: function() {
 
 		return {
-			calendarDates: null
+			calendarDates: null,
+			calendarIndex: 0
 		};
 	},
 
@@ -50,10 +52,34 @@ var CalendarScene = React.createClass( {
 		this.setState( {
 			calendarDates: calendarDates
 		} );
+
+		this.numCalendars = calendarDates.length;
 	},
 
 	componentDidMount: function() {
 
+	},
+
+	scrollToPrev: function() {
+
+		var prevIndex = Math.max( 0, this.state.calendarIndex - 1 );
+
+		this.setState( {
+			calendarIndex: prevIndex
+		} );
+
+		this.refs.scroller.scrollTo( 0, prevIndex * DEVICE_WIDTH );
+	},
+
+	scrollToNext: function() {
+
+		var nextIndex = Math.min( this.numCalendars - 1, this.state.calendarIndex + 1 );
+
+		this.setState( {
+			calendarIndex: nextIndex
+		} );
+
+		this.refs.scroller.scrollTo( 0, nextIndex * DEVICE_WIDTH );
 	},
 
 	renderCalendar: function( date, i ) {
@@ -68,7 +94,18 @@ var CalendarScene = React.createClass( {
 		return (
 			<View style={styles.main}>
 
+				<View style={styles.nav}>
+					<TouchableOpacity onPress={this.scrollToPrev}>
+						<Icon style={styles.navArrow} name='angle-left' />
+					</TouchableOpacity>
+
+					<TouchableOpacity onPress={this.scrollToNext}>
+						<Icon style={styles.navArrow} name='angle-right' />
+					</TouchableOpacity>
+				</View>
+
 				<ScrollView
+					ref='scroller'
 					pagingEnabled={true}
 					horizontal={true}
 					showsHorizontalScrollIndicator={false}
@@ -96,6 +133,14 @@ var styles = StyleSheet.create( {
 	contentContainer: {
 		flex: 1,
 		alignItems: 'center'
+	},
+	nav: {
+		flex: 1,
+		flexDirection: 'row'
+	},
+	navArrow: {
+		fontSize: 20,
+		marginHorizontal: 10
 	}
 } );
 

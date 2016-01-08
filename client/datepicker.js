@@ -8,6 +8,8 @@ var {
 	TouchableOpacity
 } = React;
 
+var PureRenderMixin = require( 'react-addons-pure-render-mixin' );
+
 var _ = require( 'underscore' );
 var Calendar = require( 'calendar' ).Calendar;
 
@@ -19,6 +21,8 @@ var DEVICE_WIDTH = Dimensions.get( 'window' ).width;
 
 
 var DatePicker = React.createClass( {
+
+	mixins: [ PureRenderMixin ],
 
 	getDefaultProps: function() {
 
