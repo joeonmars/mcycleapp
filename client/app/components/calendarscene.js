@@ -64,10 +64,6 @@ var CalendarScene = React.createClass( {
 
 		var prevIndex = Math.max( 0, this.state.calendarIndex - 1 );
 
-		this.setState( {
-			calendarIndex: prevIndex
-		} );
-
 		this.refs.scroller.scrollTo( 0, prevIndex * DEVICE_WIDTH );
 	},
 
@@ -75,11 +71,16 @@ var CalendarScene = React.createClass( {
 
 		var nextIndex = Math.min( this.numCalendars - 1, this.state.calendarIndex + 1 );
 
-		this.setState( {
-			calendarIndex: nextIndex
-		} );
-
 		this.refs.scroller.scrollTo( 0, nextIndex * DEVICE_WIDTH );
+	},
+
+	onScroll: function( e ) {
+
+		var calendarIndex = Math.round( e.nativeEvent.contentOffset.x / DEVICE_WIDTH );
+
+		this.setState( {
+			calendarIndex: calendarIndex
+		} );
 	},
 
 	renderCalendar: function( date, i ) {
@@ -89,20 +90,48 @@ var CalendarScene = React.createClass( {
 		);
 	},
 
+	renderWeekHeader: function() {
+
+		var weekdays = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
+
+		var cols = weekdays.map( function( weekday, i ) {
+			return (
+				<Text key={i} style={styles.colHeader}>{weekday}</Text>
+			);
+		} );
+
+		return (
+			<View style={styles.weekHeader}>
+				{cols}
+			</View>
+		);
+	},
+
 	render: function() {
+
+		var monthNames = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
+		var calendarDate = this.state.calendarDates[ this.state.calendarIndex ];
+		var monthName = monthNames[ calendarDate.getMonth() ];
+		var year = calendarDate.getFullYear();
 
 		return (
 			<View style={styles.main}>
 
-				<View style={styles.nav}>
-					<TouchableOpacity onPress={this.scrollToPrev}>
-						<Icon style={styles.navArrow} name='angle-left' />
-					</TouchableOpacity>
+				<View style={styles.header}>
+					<Text style={styles.dateHeading}>{monthName + ' ' + year}</Text>
 
-					<TouchableOpacity onPress={this.scrollToNext}>
-						<Icon style={styles.navArrow} name='angle-right' />
-					</TouchableOpacity>
+					<View style={styles.nav}>
+						<TouchableOpacity onPress={this.scrollToPrev}>
+							<Icon style={styles.navArrow} name='angle-left' />
+						</TouchableOpacity>
+
+						<TouchableOpacity onPress={this.scrollToNext}>
+							<Icon style={styles.navArrow} name='angle-right' />
+						</TouchableOpacity>
+					</View>
 				</View>
+
+				{this.renderWeekHeader()}
 
 				<ScrollView
 					ref='scroller'
@@ -110,9 +139,11 @@ var CalendarScene = React.createClass( {
 					horizontal={true}
 					showsHorizontalScrollIndicator={false}
 					contentContainerStyle={styles.contentContainer}
-					style={styles.scrollView}>
+					style={styles.scrollView}
+					scrollEventThrottle={200}
+					onScroll={this.onScroll}>
 
-					{this.state.calendarDates.map(this.renderCalendar)}
+					{this.state.calendarDates.map( this.renderCalendar )}
 
 				</ScrollView>
 
@@ -131,17 +162,40 @@ var styles = StyleSheet.create( {
 		height: 300
 	},
 	contentContainer: {
+		flex: 1
+	},
+	header: {
 		flex: 1,
-		alignItems: 'center'
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		paddingHorizontal: 40
 	},
 	nav: {
 		flex: 1,
-		flexDirection: 'row'
+		flexDirection: 'row',
+		justifyContent: 'flex-end'
 	},
 	navArrow: {
-		fontSize: 20,
-		marginHorizontal: 10
-	}
+		fontSize: 20
+	},
+	dateHeading: {
+		flex: 1
+	},
+	weekHeader: {
+		width: DEVICE_WIDTH,
+		paddingHorizontal: 40,
+		height: 30,
+		flex: 1,
+		flexDirection: 'row',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	colHeader: {
+		flex: 1,
+		fontSize: 10,
+		textAlign: 'center'
+	},
 } );
 
 

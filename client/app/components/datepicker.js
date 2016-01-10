@@ -63,21 +63,9 @@ var DatePicker = React.createClass( {
 
 	},
 
-	renderWeekHeader: function() {
+	formattedCalendarDate: function() {
 
-		var weekdays = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
-
-		var cols = weekdays.map( function( weekday, i ) {
-			return (
-				<Text key={i} style={styles.colHeader}>{weekday}</Text>
-			);
-		} );
-
-		return (
-			<View style={styles.weekHeader}>
-				{cols}
-			</View>
-		);
+		return ( this.state.date.format( 'MMMM' ) + ' ' + this.props.year );
 	},
 
 	renderRow: function( days, i ) {
@@ -112,10 +100,6 @@ var DatePicker = React.createClass( {
 		return (
 			<View style={styles.main}>
 
-				<Text>{this.state.date.format('MMMM')} {this.props.year}</Text>
-
-				{this.renderWeekHeader()}
-
 				<View style={styles.grid}>
 					{this.state.days.map(this.renderRow)}
 				</View>
@@ -138,18 +122,6 @@ var styles = StyleSheet.create( {
 	gridRow: {
 		flex: 1,
 		flexDirection: 'row'
-	},
-	weekHeader: {
-		height: 30,
-		flex: 1,
-		flexDirection: 'row',
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
-	colHeader: {
-		flex: 1,
-		fontSize: 10,
-		textAlign: 'center'
 	},
 	dayButton: {
 		flex: 1,

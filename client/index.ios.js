@@ -6,47 +6,13 @@
 
 var React = require( 'react-native' );
 
+
 var {
-	AppRegistry,
-	StyleSheet,
-	Navigator,
-	View,
+	AppRegistry
 } = React;
 
-var SignInScene = require( './signinscene' );
-var MainScene = require( './mainscene' );
 
-var mcycle = React.createClass( {
+var Provider = require( './app/containers/provider' );
 
-	renderScene: function( route, nav ) {
 
-		switch ( route.id ) {
-			case 'main':
-				return <MainScene navigator={nav} />;
-				break;
-
-			default:
-				return <SignInScene navigator={nav} />;
-				break;
-		}
-	},
-
-	render: function() {
-
-		var initialRoute = {
-			id: 'signin'
-		};
-
-		return (
-			<Navigator initialRoute={initialRoute} renderScene={this.renderScene} />
-		);
-	}
-} );
-
-var styles = StyleSheet.create( {
-	container: {
-		flex: 1
-	}
-} );
-
-AppRegistry.registerComponent( 'mcycle', () => mcycle );
+AppRegistry.registerComponent( 'mcycle', () => Provider );
