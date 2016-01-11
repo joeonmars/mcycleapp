@@ -59,6 +59,13 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>icon.ttf</string>
+		<string>MavenPro-Black.ttf</string>
+		<string>MavenPro-Bold.ttf</string>
+		<string>MavenPro-Medium.ttf</string>
+		<string>MavenPro-Regular.ttf</string>
+		<string>maven-pro-light-100.otf</string>
+		<string>maven-pro-light-200.otf</string>
+		<string>maven-pro-light-300.otf</string>
 	</array>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>

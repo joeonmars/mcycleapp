@@ -286,14 +286,15 @@ var styles = StyleSheet.create( {
 		color: '#fff'
 	},
 	fbButtonText: {
-		fontSize: 10,
-		color: '#fff'
+		fontSize: 16,
+		color: '#fff',
+		fontFamily: 'MavenProLight300-Regular'
 	},
 	textInput: {
 		alignSelf: 'center',
 		width: 200,
 		height: 30,
-		fontSize: 14,
+		fontSize: 12,
 		padding: 7,
 		margin: 2,
 		borderColor: '#dfdfdf',

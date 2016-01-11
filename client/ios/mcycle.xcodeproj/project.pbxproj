@@ -25,6 +25,13 @@
 		645A4B6B1C3CA03600CE8563 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 645A4B691C3CA03600CE8563 /* FBSDKLoginKit.framework */; };
 		645A4B721C3CA63700CE8563 /* libRCTFBSDKCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 645A4B711C3CA5EA00CE8563 /* libRCTFBSDKCore.a */; };
 		645A4B791C3CA68B00CE8563 /* libRCTFBSDKLogin.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 645A4B781C3CA67D00CE8563 /* libRCTFBSDKLogin.a */; };
+		64A9F0BE1C4330E200E057E0 /* MavenPro-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 64A9F0B61C4330E200E057E0 /* MavenPro-Black.ttf */; };
+		64A9F0BF1C4330E200E057E0 /* MavenPro-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 64A9F0B71C4330E200E057E0 /* MavenPro-Bold.ttf */; };
+		64A9F0C01C4330E200E057E0 /* MavenPro-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 64A9F0B81C4330E200E057E0 /* MavenPro-Medium.ttf */; };
+		64A9F0C11C4330E200E057E0 /* MavenPro-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 64A9F0B91C4330E200E057E0 /* MavenPro-Regular.ttf */; };
+		64A9F0FC1C4356AF00E057E0 /* maven-pro-light-100.otf in Resources */ = {isa = PBXBuildFile; fileRef = 64A9F0F91C4356AF00E057E0 /* maven-pro-light-100.otf */; };
+		64A9F0FD1C4356AF00E057E0 /* maven-pro-light-200.otf in Resources */ = {isa = PBXBuildFile; fileRef = 64A9F0FA1C4356AF00E057E0 /* maven-pro-light-200.otf */; };
+		64A9F0FE1C4356AF00E057E0 /* maven-pro-light-300.otf in Resources */ = {isa = PBXBuildFile; fileRef = 64A9F0FB1C4356AF00E057E0 /* maven-pro-light-300.otf */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		EBDF2BE61C404ED5001D790A /* icon.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EBDF2BE51C404ED5001D790A /* icon.ttf */; };
 /* End PBXBuildFile section */
@@ -147,6 +154,13 @@
 		645A4B691C3CA03600CE8563 /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKLoginKit.framework; path = Frameworks/FBSDKLoginKit.framework; sourceTree = "<group>"; };
 		645A4B6C1C3CA5EA00CE8563 /* RCTFBSDKCore.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTFBSDKCore.xcodeproj; path = "../node_modules/react-native-fbsdkcore/RCTFBSDKCore.xcodeproj"; sourceTree = "<group>"; };
 		645A4B731C3CA67D00CE8563 /* RCTFBSDKLogin.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTFBSDKLogin.xcodeproj; path = "../node_modules/react-native-fbsdklogin/RCTFBSDKLogin.xcodeproj"; sourceTree = "<group>"; };
+		64A9F0B61C4330E200E057E0 /* MavenPro-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "MavenPro-Black.ttf"; sourceTree = "<group>"; };
+		64A9F0B71C4330E200E057E0 /* MavenPro-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "MavenPro-Bold.ttf"; sourceTree = "<group>"; };
+		64A9F0B81C4330E200E057E0 /* MavenPro-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "MavenPro-Medium.ttf"; sourceTree = "<group>"; };
+		64A9F0B91C4330E200E057E0 /* MavenPro-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "MavenPro-Regular.ttf"; sourceTree = "<group>"; };
+		64A9F0F91C4356AF00E057E0 /* maven-pro-light-100.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "maven-pro-light-100.otf"; sourceTree = "<group>"; };
+		64A9F0FA1C4356AF00E057E0 /* maven-pro-light-200.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "maven-pro-light-200.otf"; sourceTree = "<group>"; };
+		64A9F0FB1C4356AF00E057E0 /* maven-pro-light-300.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "maven-pro-light-300.otf"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		EBDF2BE51C404ED5001D790A /* icon.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = icon.ttf; sourceTree = "<group>"; };
@@ -304,6 +318,27 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		64A9F0B51C4330E200E057E0 /* Maven Pro */ = {
+			isa = PBXGroup;
+			children = (
+				64A9F0B61C4330E200E057E0 /* MavenPro-Black.ttf */,
+				64A9F0B71C4330E200E057E0 /* MavenPro-Bold.ttf */,
+				64A9F0B81C4330E200E057E0 /* MavenPro-Medium.ttf */,
+				64A9F0B91C4330E200E057E0 /* MavenPro-Regular.ttf */,
+			);
+			path = "Maven Pro";
+			sourceTree = "<group>";
+		};
+		64A9F0BA1C4330E200E057E0 /* Maven Pro Light */ = {
+			isa = PBXGroup;
+			children = (
+				64A9F0F91C4356AF00E057E0 /* maven-pro-light-100.otf */,
+				64A9F0FA1C4356AF00E057E0 /* maven-pro-light-200.otf */,
+				64A9F0FB1C4356AF00E057E0 /* maven-pro-light-300.otf */,
+			);
+			path = "Maven Pro Light";
+			sourceTree = "<group>";
+		};
 		78C398B11ACF4ADC00677621 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -365,6 +400,8 @@
 		EBDF2BE41C404ED5001D790A /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
+				64A9F0B51C4330E200E057E0 /* Maven Pro */,
+				64A9F0BA1C4330E200E057E0 /* Maven Pro Light */,
 				EBDF2BE51C404ED5001D790A /* icon.ttf */,
 			);
 			path = Fonts;
@@ -595,9 +632,16 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				64A9F0FE1C4356AF00E057E0 /* maven-pro-light-300.otf in Resources */,
+				64A9F0C11C4330E200E057E0 /* MavenPro-Regular.ttf in Resources */,
+				64A9F0BE1C4330E200E057E0 /* MavenPro-Black.ttf in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
+				64A9F0BF1C4330E200E057E0 /* MavenPro-Bold.ttf in Resources */,
+				64A9F0FD1C4356AF00E057E0 /* maven-pro-light-200.otf in Resources */,
 				EBDF2BE61C404ED5001D790A /* icon.ttf in Resources */,
+				64A9F0FC1C4356AF00E057E0 /* maven-pro-light-100.otf in Resources */,
+				64A9F0C01C4330E200E057E0 /* MavenPro-Medium.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -3,10 +3,12 @@ var React = require( 'react-native' );
 var {
 	StyleSheet,
 	View,
-	ScrollView,
+	ListView,
 	Text,
 	Dimensions,
-	TouchableOpacity
+	TouchableOpacity,
+	TouchableWithoutFeedback,
+	InteractionManager
 } = React;
 
 var DatePicker = require( './datepicker' );
@@ -29,19 +31,26 @@ var CalendarScene = React.createClass( {
 
 		return {
 			calendarDates: null,
-			calendarIndex: 0
+			calendarIndex: 0,
+			shouldRender: false
 		};
 	},
 
 	componentWillMount: function() {
 
+		this.numPastMonths = 12;
+		this.numFutureMonths = 12;
+		this.numCalendars = this.numPastMonths + this.numFutureMonths;
+
+		this.initialOffsetX = this.numPastMonths * DEVICE_WIDTH;
+
 		var startDate = new Date();
 		startDate.setDate( 1 );
-		startDate.setMonth( startDate.getMonth() - 12 );
+		startDate.setMonth( startDate.getMonth() - this.numPastMonths );
 
 		var calendarDates = [];
 
-		for ( var i = 0; i < 24; i++ ) {
+		for ( var i = 0; i < this.numCalendars; i++ ) {
 
 			var date = new Date( startDate );
 			date.setMonth( date.getMonth() + i );
@@ -49,29 +58,45 @@ var CalendarScene = React.createClass( {
 			calendarDates.push( date );
 		}
 
-		this.setState( {
-			calendarDates: calendarDates
+		var ds = new ListView.DataSource( {
+			rowHasChanged: function( row1, row2 ) {
+				return row1 !== row2;
+			}
 		} );
 
-		this.numCalendars = calendarDates.length;
+		var dataSource = ds.cloneWithRows( calendarDates );
+
+		this.setState( {
+			calendarDates: calendarDates,
+			calendarIndex: this.numPastMonths,
+			dataSource: dataSource
+		} );
 	},
 
 	componentDidMount: function() {
 
+		InteractionManager.runAfterInteractions( this.onRunAfterInteractions );
 	},
 
 	scrollToPrev: function() {
 
 		var prevIndex = Math.max( 0, this.state.calendarIndex - 1 );
 
-		this.refs.scroller.scrollTo( 0, prevIndex * DEVICE_WIDTH );
+		this.refs.listView.scrollResponderScrollTo( prevIndex * DEVICE_WIDTH );
 	},
 
 	scrollToNext: function() {
 
 		var nextIndex = Math.min( this.numCalendars - 1, this.state.calendarIndex + 1 );
 
-		this.refs.scroller.scrollTo( 0, nextIndex * DEVICE_WIDTH );
+		this.refs.listView.scrollResponderScrollTo( nextIndex * DEVICE_WIDTH );
+	},
+
+	jumpToPresent: function() {
+
+		var offsetX = this.numPastMonths * DEVICE_WIDTH;
+
+		this.refs.listView.scrollResponderScrollWithouthAnimationTo( offsetX );
 	},
 
 	onScroll: function( e ) {
@@ -80,6 +105,13 @@ var CalendarScene = React.createClass( {
 
 		this.setState( {
 			calendarIndex: calendarIndex
+		} );
+	},
+
+	onRunAfterInteractions: function() {
+
+		this.setState( {
+			shouldRender: true
 		} );
 	},
 
@@ -109,44 +141,60 @@ var CalendarScene = React.createClass( {
 
 	render: function() {
 
-		var monthNames = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
-		var calendarDate = this.state.calendarDates[ this.state.calendarIndex ];
-		var monthName = monthNames[ calendarDate.getMonth() ];
-		var year = calendarDate.getFullYear();
+		if ( this.state.shouldRender ) {
+
+			var monthNames = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
+			var calendarDate = this.state.calendarDates[ this.state.calendarIndex ];
+			var monthName = monthNames[ calendarDate.getMonth() ];
+			var year = calendarDate.getFullYear();
+
+			var hasReachedMinTime = ( this.state.calendarIndex === 0 );
+			var hasReachedMaxTime = ( this.state.calendarIndex === this.numCalendars - 1 );
+			var isNotPresentTime = ( this.state.calendarIndex !== this.numPastMonths );
+
+			return (
+				<View style={styles.main}>
+
+					<View style={styles.header}>
+						<Text style={styles.dateHeading}>{monthName + ' ' + year}</Text>
+
+						<View style={styles.nav}>
+							<TouchableWithoutFeedback onPress={this.scrollToPrev}>
+								<Icon style={[styles.navArrow, hasReachedMinTime ? styles.inactiveNavButton : null]} name='angle-left' />
+							</TouchableWithoutFeedback>
+
+							<TouchableWithoutFeedback onPress={this.jumpToPresent}>
+								<Icon style={[styles.navDot, isNotPresentTime ? null : styles.inactiveNavButton]} name='dot-circled' />
+							</TouchableWithoutFeedback>
+
+							<TouchableWithoutFeedback onPress={this.scrollToNext}>
+								<Icon style={[styles.navArrow, hasReachedMaxTime ? styles.inactiveNavButton : null]} name='angle-right' />
+							</TouchableWithoutFeedback>
+						</View>
+					</View>
+
+					{this.renderWeekHeader()}
+
+					<ListView
+						ref='listView'
+						dataSource={this.state.dataSource}
+						renderRow={this.renderCalendar}
+						initialListSize={1}
+						pagingEnabled={true}
+						horizontal={true}
+						showsHorizontalScrollIndicator={false}
+						contentOffset={{x: this.initialOffsetX}}
+						contentContainerStyle={styles.contentContainer}
+						style={styles.listView}
+						scrollEventThrottle={50}
+						onScroll={this.onScroll} />
+
+				</View>
+			);
+		}
 
 		return (
 			<View style={styles.main}>
-
-				<View style={styles.header}>
-					<Text style={styles.dateHeading}>{monthName + ' ' + year}</Text>
-
-					<View style={styles.nav}>
-						<TouchableOpacity onPress={this.scrollToPrev}>
-							<Icon style={styles.navArrow} name='angle-left' />
-						</TouchableOpacity>
-
-						<TouchableOpacity onPress={this.scrollToNext}>
-							<Icon style={styles.navArrow} name='angle-right' />
-						</TouchableOpacity>
-					</View>
-				</View>
-
-				{this.renderWeekHeader()}
-
-				<ScrollView
-					ref='scroller'
-					pagingEnabled={true}
-					horizontal={true}
-					showsHorizontalScrollIndicator={false}
-					contentContainerStyle={styles.contentContainer}
-					style={styles.scrollView}
-					scrollEventThrottle={200}
-					onScroll={this.onScroll}>
-
-					{this.state.calendarDates.map( this.renderCalendar )}
-
-				</ScrollView>
-
 			</View>
 		);
 	}
@@ -157,7 +205,7 @@ var styles = StyleSheet.create( {
 	main: {
 		backgroundColor: '#fff'
 	},
-	scrollView: {
+	listView: {
 		width: DEVICE_WIDTH,
 		height: 300
 	},
@@ -174,10 +222,20 @@ var styles = StyleSheet.create( {
 	nav: {
 		flex: 1,
 		flexDirection: 'row',
+		alignItems: 'center',
 		justifyContent: 'flex-end'
 	},
 	navArrow: {
+		color: 'black',
 		fontSize: 20
+	},
+	navDot: {
+		color: 'black',
+		fontSize: 10,
+		marginHorizontal: 10
+	},
+	inactiveNavButton: {
+		color: 'lightgray'
 	},
 	dateHeading: {
 		flex: 1
