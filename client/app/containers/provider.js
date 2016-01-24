@@ -1,18 +1,18 @@
 var React = require( 'react-native' );
-//var Provider = require( 'react-redux' ).Provider;
+var Provider = require( 'react-redux' ).Provider;
 
+var store = require( '../stores/todos' );
 var App = require( './app' );
 
 
-var Provider = React.createClass( {
+module.exports = React.createClass( {
 
 	render: function() {
 
 		return (
-			<App />
+			<Provider store={store}>
+				<App />
+			</Provider>
 		);
 	}
 } );
-
-
-module.exports = Provider;

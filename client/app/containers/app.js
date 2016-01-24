@@ -1,12 +1,12 @@
 var React = require( 'react-native' );
-//var connect = require( 'react-redux' ).connect;
+var connect = require( 'react-redux' ).connect;
 
 var {
-	StyleSheet,
 	Navigator
 } = React;
 
 var SignInScene = require( '../components/signinscene' );
+var SetupScene = require( '../components/setup' );
 var MainScene = require( '../components/mainscene' );
 
 
@@ -19,7 +19,11 @@ var App = React.createClass( {
 				return <MainScene navigator={nav} />;
 				break;
 
-			default:
+			case 'setup':
+				return <SetupScene navigator={nav} />;
+				break;
+
+			case 'signin':
 				return <SignInScene navigator={nav} />;
 				break;
 		}
@@ -38,20 +42,12 @@ var App = React.createClass( {
 } );
 
 
-var styles = StyleSheet.create( {
-	container: {
-		flex: 1
-	}
-} );
-
-/*
 function mapStateToProps( state ) {
 
 	return {
 		todos: state
 	};
-}
-*/
+};
 
-module.exports = App;
-//module.exports = connect( mapStateToProps )( App );
+
+module.exports = connect( mapStateToProps )( App );

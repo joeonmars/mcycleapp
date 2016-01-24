@@ -107,7 +107,7 @@ var SignInScene = React.createClass( {
 					user: json
 				} );
 
-				this.gotoMainScene();
+				this.gotoSetup();
 
 			}.bind( this ) )
 			.catch( function( err ) {
@@ -140,10 +140,10 @@ var SignInScene = React.createClass( {
 		this.signOut();
 	},
 
-	gotoMainScene: function() {
+	gotoSetup: function() {
 
 		this.props.navigator.push( {
-			id: 'main',
+			id: 'main', //'setup',
 			sceneConfig: Navigator.SceneConfigs.FloatFromRight
 		} );
 	},

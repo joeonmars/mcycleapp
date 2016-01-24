@@ -6,7 +6,8 @@ var {
 	View,
 	Text,
 	Dimensions,
-	TouchableOpacity
+	TouchableOpacity,
+	StatusBarIOS
 } = React;
 
 var CalendarScene = require( './calendarscene' );
