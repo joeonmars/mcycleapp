@@ -96,7 +96,7 @@ var CalendarScene = React.createClass( {
 
 		var offsetX = this.numPastMonths * DEVICE_WIDTH;
 
-		this.refs.listView.scrollResponderScrollWithouthAnimationTo( offsetX );
+		this.refs.listView.scrollResponderScrollWithoutAnimationTo( offsetX );
 	},
 
 	onScroll: function( e ) {

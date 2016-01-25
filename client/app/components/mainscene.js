@@ -6,9 +6,14 @@ var {
 	View,
 	Text,
 	Dimensions,
-	TouchableOpacity,
-	StatusBarIOS
+	TouchableOpacity
 } = React;
+
+var connect = require( 'react-redux' ).connect;
+
+var RCTStatusBarManager = require( 'NativeModules' ).StatusBarManager;
+
+var CalendarActions = require( '../actions' ).CalendarActions;
 
 var CalendarScene = require( './calendarscene' );
 var SummaryScene = require( './summaryscene' );
@@ -23,11 +28,24 @@ var tabIds = [ 'calendar', 'summary', 'alert', 'config' ];
 var MainScene = React.createClass( {
 
 	getInitialState: function() {
-		return {};
+
+		return {
+			statusBarHeight: 0
+		};
 	},
 
 	componentDidMount: function() {
 
+		RCTStatusBarManager.getHeight( this.onGetStatusBarHeight );
+
+		this.props.dispatch( CalendarActions.addPeriod( 1, 2 ) );
+	},
+
+	onGetStatusBarHeight: function( result ) {
+
+		this.setState( {
+			statusBarHeight: result.height
+		} );
 	},
 
 	onClickNavButton: function( id ) {
@@ -84,8 +102,12 @@ var MainScene = React.createClass( {
 			id: 'calendar'
 		};
 
+		var excludeStatusBar = {
+			paddingTop: this.state.statusBarHeight
+		};
+
 		return (
-			<Navigator ref='mainNav' sceneStyle={styles.sceneContainer} initialRoute={initialRoute} renderScene={this.renderScene} navigationBar={this.renderNavigatorBar()} />
+			<Navigator ref='mainNav' sceneStyle={[styles.sceneContainer, excludeStatusBar]} initialRoute={initialRoute} renderScene={this.renderScene} navigationBar={this.renderNavigatorBar()} />
 		);
 	}
 } );
@@ -112,11 +134,18 @@ var styles = StyleSheet.create( {
 		color: '#fff'
 	},
 	sceneContainer: {
-		paddingTop: 30,
 		paddingBottom: 50,
 		backgroundColor: '#fff'
 	}
 } );
 
 
-module.exports = MainScene;
+function mapStateToProps( state ) {
+
+	return {
+		periods: state.periods
+	};
+};
+
+
+module.exports = connect( mapStateToProps )( MainScene );

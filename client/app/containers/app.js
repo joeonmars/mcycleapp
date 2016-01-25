@@ -42,12 +42,14 @@ var App = React.createClass( {
 } );
 
 
+// Which props do we want to inject, given the global state?
+// Note: use https://github.com/faassen/reselect for better performance.
 function mapStateToProps( state ) {
 
 	return {
-		todos: state
+		periods: state.periods
 	};
 };
 
-
+// Wrap the component to inject dispatch and state into it
 module.exports = connect( mapStateToProps )( App );

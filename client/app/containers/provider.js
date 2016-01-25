@@ -1,7 +1,7 @@
 var React = require( 'react-native' );
 var Provider = require( 'react-redux' ).Provider;
 
-var store = require( '../stores/todos' );
+var store = require( '../store' );
 var App = require( './app' );
 
 
