@@ -14,17 +14,19 @@ var App = React.createClass( {
 
 	renderScene: function( route, nav ) {
 
+		var dispatch = this.props.dispatch;
+
 		switch ( route.id ) {
 			case 'main':
-				return <MainScene navigator={nav} />;
+				return <MainScene navigator={nav} dispatch={dispatch} />;
 				break;
 
 			case 'setup':
-				return <SetupScene navigator={nav} />;
+				return <SetupScene navigator={nav} dispatch={dispatch} />;
 				break;
 
 			case 'signin':
-				return <SignInScene navigator={nav} />;
+				return <SignInScene navigator={nav} dispatch={dispatch} />;
 				break;
 		}
 	},

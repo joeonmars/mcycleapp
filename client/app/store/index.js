@@ -1,12 +1,63 @@
-var createStore = require( 'redux' ).createStore;
-var combineReducers = require( 'redux' ).combineReducers;
-var update = require( 'react-addons-update' );
+var {
+	createStore,
+	applyMiddleware,
+	compose,
+	combineReducers
+} = require( 'redux' );
 
+var update = require( 'react-addons-update' );
+var thunk = require( 'redux-thunk' );
+var devTools = require( 'remote-redux-devtools' );
+
+var moment = require( 'moment' );
+var _ = require( 'underscore' );
+var Identifiers = require( 'identifiers' );
 var ActionTypes = require( '../constants/actiontypes' );
 
+var identifiers = new Identifiers( 4 );
+
 var initialState = {
-	periods: [],
-	futurePeriods: []
+	periods: {
+		past: [],
+		current: [],
+		future: []
+	}
+};
+
+
+var calculateFuturePeriods = function( currentPeriodEnd, avgDays, avgGap ) {
+
+	var futurePeriods = [];
+	var start, end = currentPeriodEnd;
+
+	var maxDay = moment().add( 1, 'years' );
+	var shouldCalcNextPeriod = true;
+
+	while ( shouldCalcNextPeriod ) {
+
+		start = end.clone().add( avgGap, 'days' );
+		end = start.clone().add( avgDays, 'days' );
+
+		var reachedMaxDay = ( start > maxDay || end > maxDay );
+
+		if ( reachedMaxDay ) {
+
+			shouldCalcNextPeriod = false;
+
+		} else {
+
+			var period = {
+				id: identifiers.next(),
+				start: start,
+				end: end,
+				future: true
+			};
+
+			futurePeriods.push( period );
+		}
+	}
+
+	return futurePeriods;
 };
 
 
@@ -16,32 +67,29 @@ var processPeriods = function( state = [], action ) {
 
 		case ActionTypes.ADD_PERIOD:
 
-			var newPeriod = {
-				start: action.start,
-				end: action.end
+			var now = moment();
+			var start = moment( action.start );
+			var end = moment( action.end );
+
+			var period = {
+				id: identifiers.next(),
+				start: start,
+				end: end
 			};
 
-			var nextState = update( state, {
-				$push: [ newPeriod ]
-			} );
+			var key = ( end < now ) ? 'past' : 'current';
+			period[ key ] = true;
 
-			return nextState;
+			var updates = {};
+			updates[ key ] = {
+				$push: [ period ]
+			};
 
-		default:
-			return state;
-	}
-};
+			updates[ 'future' ] = {
+				$set: calculateFuturePeriods( end, 7, 28 )
+			};
 
-
-var processFuturePeriods = function( state = [], action ) {
-
-	switch ( action.type ) {
-
-		case ActionTypes.UPDATE_FUTURE_PERIODS:
-
-			var nextState = state;
-
-			// TODO: predict future periods
+			var nextState = update( state, updates );
 
 			return nextState;
 
@@ -58,9 +106,13 @@ var processFuturePeriods = function( state = [], action ) {
 var reducer = combineReducers( {
 
 	periods: processPeriods,
-	futurePeriods: processFuturePeriods
 
 } );
 
+var enhancer = compose(
+	applyMiddleware( thunk ),
+	devTools()
+);
 
-module.exports = createStore( reducer, initialState );
+
+module.exports = createStore( reducer, initialState, enhancer );

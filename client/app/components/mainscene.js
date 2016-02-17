@@ -37,8 +37,6 @@ var MainScene = React.createClass( {
 	componentDidMount: function() {
 
 		RCTStatusBarManager.getHeight( this.onGetStatusBarHeight );
-
-		this.props.dispatch( CalendarActions.addPeriod( 1, 2 ) );
 	},
 
 	onGetStatusBarHeight: function( result ) {

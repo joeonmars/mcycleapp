@@ -13,6 +13,7 @@ var {
 
 var DatePicker = require( './datepicker' );
 var Icon = require( './icon' ).Icon;
+var moment = require( 'moment' );
 
 var DEVICE_WIDTH = Dimensions.get( 'window' ).width;
 
@@ -82,21 +83,28 @@ var CalendarScene = React.createClass( {
 
 		var prevIndex = Math.max( 0, this.state.calendarIndex - 1 );
 
-		this.refs.listView.scrollResponderScrollTo( prevIndex * DEVICE_WIDTH );
+		this.refs.listView.scrollResponderScrollTo( {
+			x: prevIndex * DEVICE_WIDTH
+		} );
 	},
 
 	scrollToNext: function() {
 
 		var nextIndex = Math.min( this.numCalendars - 1, this.state.calendarIndex + 1 );
 
-		this.refs.listView.scrollResponderScrollTo( nextIndex * DEVICE_WIDTH );
+		this.refs.listView.scrollResponderScrollTo( {
+			x: nextIndex * DEVICE_WIDTH
+		} );
 	},
 
 	jumpToPresent: function() {
 
 		var offsetX = this.numPastMonths * DEVICE_WIDTH;
 
-		this.refs.listView.scrollResponderScrollWithoutAnimationTo( offsetX );
+		this.refs.listView.scrollResponderScrollTo( {
+			x: offsetX,
+			animated: false
+		} );
 	},
 
 	onScroll: function( e ) {
@@ -124,7 +132,7 @@ var CalendarScene = React.createClass( {
 
 	renderWeekHeader: function() {
 
-		var weekdays = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
+		var weekdays = moment.weekdaysShort();
 
 		var cols = weekdays.map( function( weekday, i ) {
 			return (
@@ -143,7 +151,7 @@ var CalendarScene = React.createClass( {
 
 		if ( this.state.shouldRender ) {
 
-			var monthNames = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
+			var monthNames = moment.months();
 			var calendarDate = this.state.calendarDates[ this.state.calendarIndex ];
 			var monthName = monthNames[ calendarDate.getMonth() ];
 			var year = calendarDate.getFullYear();

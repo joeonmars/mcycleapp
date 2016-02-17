@@ -10,8 +10,10 @@ var {
 	View,
 } = React;
 
-var Form = require( 'react-native-form' );
+var Form = require( 'react-native-form' ).default;
 var Icon = require( './icon' ).Icon;
+
+var CalendarActions = require( '../actions' ).CalendarActions;
 
 var FBSDKLogin = require( 'react-native-fbsdklogin' );
 var FBSDKLoginButton = FBSDKLogin.FBSDKLoginButton;
@@ -37,6 +39,10 @@ var SignInScene = React.createClass( {
 
 	componentDidMount: function() {
 
+		// WIP
+		var start = new Date();
+		var end = new Date( start.getTime() + 7 * 24 * 60 * 60 * 1000 );
+		this.props.dispatch( CalendarActions.addPeriod( start, end ) );
 	},
 
 	signUp: function( username, password, email, via ) {
