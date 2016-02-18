@@ -51,6 +51,22 @@ var DatePicker = React.createClass( {
 			} );
 		} );
 
+		var requiredDays = 7 * 6;
+		var currentDays = daysMoment.length * 7;
+		var numDaysToFill = requiredDays - currentDays;
+
+		if ( numDaysToFill > 0 ) {
+
+			var lastDay = _.last( _.last( daysMoment ) );
+			var daysMomentToFill = _.times( numDaysToFill, function( index ) {
+				return moment( lastDay ).add( index + 1, 'day' );
+			} );
+
+			while ( daysMomentToFill.length > 0 ) {
+				daysMoment.push( daysMomentToFill.splice( 0, 7 ) );
+			}
+		}
+
 		var date = moment( new Date( this.props.year, this.props.month ) );
 
 		this.setState( {
@@ -70,11 +86,33 @@ var DatePicker = React.createClass( {
 
 	renderRow: function( days, i ) {
 
-		var currentMonth = this.state.date.month();
+		var now = moment();
+		var thisMonth = this.state.date.month();
+
+		var currentPeriods = this.props.currentPeriods;
+		var futurePeriods = this.props.futurePeriods;
 
 		var formattedDaysInRow = _.map( days, function( mdate, _i ) {
 
-			var isOtherMonthDay = ( mdate.month() !== currentMonth );
+			var isOtherMonthDay = ( mdate.month() !== thisMonth );
+
+			var diffDays = mdate.diff( now, 'days' );
+			var isToday = ( diffDays === 0 && !( 1 / diffDays > 0 ) );
+
+			var isCurrentPeriodDay = _.some( currentPeriods, function( period ) {
+				return ( period.start.diff( mdate, 'days' ) <= 0 && period.end.diff( mdate, 'days' ) >= 0 );
+			} );
+
+			var isFuturePeriodDay = _.some( futurePeriods, function( period ) {
+				return ( period.start.diff( mdate, 'days' ) <= 0 && period.end.diff( mdate, 'days' ) >= 0 );
+			} );
+
+			var style = [
+				styles.dayButton,
+				isCurrentPeriodDay ? styles.currentPeriodDay : null,
+				isFuturePeriodDay ? styles.futurePeriodDay : null,
+				isToday ? styles.today : null
+			];
 
 			var textStyle = [
 				styles.dayText,
@@ -82,7 +120,7 @@ var DatePicker = React.createClass( {
 			];
 
 			return (
-				<TouchableOpacity key={_i} style={styles.dayButton}>
+				<TouchableOpacity key={_i} style={style}>
 					<Text style={textStyle}>{mdate.date()}</Text>
 				</TouchableOpacity>
 			);
@@ -113,7 +151,6 @@ var DatePicker = React.createClass( {
 var styles = StyleSheet.create( {
 	main: {
 		width: DEVICE_WIDTH,
-		paddingHorizontal: 40,
 		backgroundColor: '#fff'
 	},
 	grid: {
@@ -121,12 +158,24 @@ var styles = StyleSheet.create( {
 	},
 	gridRow: {
 		flex: 1,
-		flexDirection: 'row'
+		flexDirection: 'row',
+		width: 315,
+		alignSelf: 'center'
 	},
 	dayButton: {
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
+	},
+	currentPeriodDay: {
+		backgroundColor: '#ff9999'
+	},
+	futurePeriodDay: {
+		backgroundColor: '#ffe6e6'
+	},
+	today: {
+		borderBottomColor: '#000000',
+		borderBottomWidth: 4
 	},
 	dayText: {
 		fontSize: 12

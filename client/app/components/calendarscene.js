@@ -14,6 +14,7 @@ var {
 var DatePicker = require( './datepicker' );
 var Icon = require( './icon' ).Icon;
 var moment = require( 'moment' );
+var _ = require( 'underscore' );
 
 var DEVICE_WIDTH = Dimensions.get( 'window' ).width;
 
@@ -53,9 +54,7 @@ var CalendarScene = React.createClass( {
 
 		for ( var i = 0; i < this.numCalendars; i++ ) {
 
-			var date = new Date( startDate );
-			date.setMonth( date.getMonth() + i );
-
+			var date = moment( startDate ).add( i, 'month' );
 			calendarDates.push( date );
 		}
 
@@ -125,8 +124,24 @@ var CalendarScene = React.createClass( {
 
 	renderCalendar: function( date, i ) {
 
+		var periods = this.props.periods;
+		var monthStart = date.clone().startOf( 'month' );
+		var monthEnd = date.clone().endOf( 'month' );
+
+		var currentPeriods = _.filter( periods.current, function( period ) {
+			var timeOverlapped = ( period.start <= monthEnd && period.end >= monthStart );
+			return timeOverlapped;
+		} );
+
+		var futurePeriods = _.filter( periods.future, function( period ) {
+			var timeOverlapped = ( period.start <= monthEnd && period.end >= monthStart );
+			return timeOverlapped;
+		} );
+
 		return (
-			<DatePicker key={i} year={date.getFullYear()} month={date.getMonth()} />
+			<DatePicker key={i}
+				year={date.year()} month={date.month()}
+				currentPeriods={currentPeriods} futurePeriods={futurePeriods} />
 		);
 	},
 
@@ -153,8 +168,8 @@ var CalendarScene = React.createClass( {
 
 			var monthNames = moment.months();
 			var calendarDate = this.state.calendarDates[ this.state.calendarIndex ];
-			var monthName = monthNames[ calendarDate.getMonth() ];
-			var year = calendarDate.getFullYear();
+			var monthName = monthNames[ calendarDate.month() ];
+			var year = calendarDate.year();
 
 			var hasReachedMinTime = ( this.state.calendarIndex === 0 );
 			var hasReachedMaxTime = ( this.state.calendarIndex === this.numCalendars - 1 );
@@ -249,13 +264,13 @@ var styles = StyleSheet.create( {
 		flex: 1
 	},
 	weekHeader: {
-		width: DEVICE_WIDTH,
-		paddingHorizontal: 40,
+		width: 315,
 		height: 30,
 		flex: 1,
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center',
+		alignSelf: 'center'
 	},
 	colHeader: {
 		flex: 1,

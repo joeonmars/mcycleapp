@@ -71,7 +71,7 @@ var MainScene = React.createClass( {
 
 			case 'calendar':
 			default:
-				return <CalendarScene navigator={nav} />;
+				return <CalendarScene navigator={nav} periods={this.props.periods} />;
 				break;
 		}
 	},

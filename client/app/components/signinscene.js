@@ -41,7 +41,10 @@ var SignInScene = React.createClass( {
 
 		// WIP
 		var start = new Date();
+		start.setHours( 0, 0, 0, 0 );
+
 		var end = new Date( start.getTime() + 7 * 24 * 60 * 60 * 1000 );
+
 		this.props.dispatch( CalendarActions.addPeriod( start, end ) );
 	},
 
