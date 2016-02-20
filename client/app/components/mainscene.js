@@ -6,7 +6,7 @@ var {
 	View,
 	Text,
 	Dimensions,
-	TouchableOpacity
+	TouchableWithoutFeedback
 } = React;
 
 var connect = require( 'react-redux' ).connect;
@@ -15,6 +15,7 @@ var RCTStatusBarManager = require( 'NativeModules' ).StatusBarManager;
 
 var CalendarActions = require( '../actions' ).CalendarActions;
 
+var Icon = require( './icon' ).Icon;
 var CalendarScene = require( './calendarscene' );
 var SummaryScene = require( './summaryscene' );
 var AlertScene = require( './alertscene' );
@@ -30,13 +31,36 @@ var MainScene = React.createClass( {
 	getInitialState: function() {
 
 		return {
-			statusBarHeight: 0
+			statusBarHeight: 0,
+			showNav: true,
+			routeId: tabIds[ 0 ]
 		};
 	},
 
 	componentDidMount: function() {
 
 		RCTStatusBarManager.getHeight( this.onGetStatusBarHeight );
+
+		this.willFocusHandler = this.refs.mainNav.navigationContext.addListener( 'willfocus', this.onNavWillFocus );
+	},
+
+	componentWillUnmount: function() {
+
+		this.willFocusHandler.remove();
+	},
+
+	showNav: function() {
+
+		this.setState( {
+			showNav: true
+		} );
+	},
+
+	hideNav: function() {
+
+		this.setState( {
+			showNav: false
+		} );
 	},
 
 	onGetStatusBarHeight: function( result ) {
@@ -46,11 +70,17 @@ var MainScene = React.createClass( {
 		} );
 	},
 
+	onNavWillFocus: function( e ) {
+
+		this.setState( {
+			routeId: e.data.route.id
+		} );
+	},
+
 	onClickNavButton: function( id ) {
 
 		this.refs.mainNav.replace( {
-			id: id,
-			sceneConfig: Navigator.SceneConfigs.FloatFromRight
+			id: id
 		} );
 	},
 
@@ -59,45 +89,70 @@ var MainScene = React.createClass( {
 		switch ( route.id ) {
 			case 'alert':
 				return <AlertScene navigator={nav} />;
-				break;
 
 			case 'summary':
 				return <SummaryScene navigator={nav} />;
-				break;
 
 			case 'config':
 				return <ConfigScene navigator={nav} />;
-				break;
 
 			case 'calendar':
 			default:
-				return <CalendarScene navigator={nav} periods={this.props.periods} />;
-				break;
+				return (
+					<CalendarScene navigator={nav} periods={this.props.periods}
+						showMainNav={this.showNav} hideMainNav={this.hideNav} />
+				);
 		}
 	},
 
 	renderNavigationButton: function( id ) {
 
+		var iconName;
+
+		switch ( id ) {
+			case 'calendar':
+				iconName = 'notebook';
+				break;
+
+			case 'config':
+				iconName = 'gear';
+				break;
+
+			case 'alert':
+				iconName = 'lightbulb';
+				break;
+
+			case 'summary':
+				iconName = 'analysis';
+				break;
+		}
+
+		var isActive = ( this.state.routeId === id );
+		var buttonStyle = [ styles.navButton, isActive ? styles.currentNav : null ];
+		var iconStyle = [ styles.navIcon, isActive ? styles.currentIcon : null ];
+
 		return (
-			<TouchableOpacity key={id} style={styles.navButton} onPress={this.onClickNavButton.bind(this, id)}>
-				<Text style={styles.navButtonText}>{id}</Text>
-		    </TouchableOpacity>
+			<TouchableWithoutFeedback key={id} onPress={this.onClickNavButton.bind(this, id)}>
+				<View style={buttonStyle}>
+					<Icon style={iconStyle} name={iconName} />
+				</View>
+		    </TouchableWithoutFeedback>
 		);
 	},
 
 	renderNavigatorBar: function() {
 
-		return (
+		return this.state.showNav ? (
 			<View style={styles.navBar}>
-				{tabIds.map(this.renderNavigationButton)}
+				{tabIds.map( this.renderNavigationButton )}
 			</View>
-		);
+		) : null;
 	},
 
 	render: function() {
 
 		var initialRoute = {
-			id: 'calendar'
+			id: tabIds[ 0 ]
 		};
 
 		var excludeStatusBar = {
@@ -118,21 +173,29 @@ var styles = StyleSheet.create( {
 		flex: 1,
 		flexDirection: 'row',
 		width: DEVICE_WIDTH,
-		height: 50,
-		backgroundColor: 'blue'
+		height: 60,
+		backgroundColor: 'white'
 	},
 	navButton: {
 		flex: 1,
-		height: 50,
+		height: 60,
 		justifyContent: 'center',
-		alignItems: 'center'
+		alignItems: 'center',
+		borderTopWidth: 1.5,
+		borderTopColor: 'transparent'
 	},
-	navButtonText: {
+	currentNav: {
+		borderTopColor: '#979797'
+	},
+	navIcon: {
 		textAlign: 'center',
-		color: '#fff'
+		color: '#000',
+		fontSize: 18
+	},
+	currentIcon: {
+		color: '#979797'
 	},
 	sceneContainer: {
-		paddingBottom: 50,
 		backgroundColor: '#fff'
 	}
 } );

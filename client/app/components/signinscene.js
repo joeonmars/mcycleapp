@@ -46,6 +46,8 @@ var SignInScene = React.createClass( {
 		var end = new Date( start.getTime() + 7 * 24 * 60 * 60 * 1000 );
 
 		this.props.dispatch( CalendarActions.addPeriod( start, end ) );
+
+		this.props.dispatch( CalendarActions.updateToday() );
 	},
 
 	signUp: function( username, password, email, via ) {

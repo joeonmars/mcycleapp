@@ -20,7 +20,12 @@ var initialState = {
 	periods: {
 		past: [],
 		current: [],
-		future: []
+		future: [],
+		today: {
+			start: null,
+			periodId: null,
+			periodDayIndex: 0
+		}
 	}
 };
 
@@ -61,7 +66,7 @@ var calculateFuturePeriods = function( currentPeriodEnd, avgDays, avgGap ) {
 };
 
 
-var processPeriods = function( state = [], action ) {
+var processPeriods = function( state = {}, action ) {
 
 	switch ( action.type ) {
 
@@ -93,6 +98,27 @@ var processPeriods = function( state = [], action ) {
 
 			return nextState;
 
+
+		case ActionTypes.UPDATE_TODAY:
+
+			var startOfDay = moment().startOf( 'day' );
+			var currentPeriod = state.current[ 0 ];
+			var periodDayIndex = startOfDay.diff( currentPeriod.start, 'days' );
+
+			var nextState = update( state, {
+				today: {
+					start: {
+						$set: startOfDay
+					},
+					periodDayIndex: {
+						$set: periodDayIndex
+					}
+				}
+			} );
+
+			return nextState;
+
+
 		default:
 			return state;
 	}
@@ -105,7 +131,7 @@ var processPeriods = function( state = [], action ) {
  */
 var reducer = combineReducers( {
 
-	periods: processPeriods,
+	periods: processPeriods
 
 } );
 

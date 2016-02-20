@@ -5,7 +5,7 @@ var {
 	View,
 	Text,
 	Dimensions,
-	TouchableOpacity
+	TouchableWithoutFeedback
 } = React;
 
 var PureRenderMixin = require( 'react-addons-pure-render-mixin' );
@@ -28,7 +28,8 @@ var DatePicker = React.createClass( {
 
 		return {
 			year: now.year(),
-			month: now.month()
+			month: now.month(),
+			today: null
 		};
 	},
 
@@ -36,7 +37,8 @@ var DatePicker = React.createClass( {
 
 		return {
 			days: null,
-			date: null
+			date: null,
+			keyOfSelectedDay: null
 		};
 	},
 
@@ -45,9 +47,20 @@ var DatePicker = React.createClass( {
 		var cal = new Calendar();
 		var days = cal.monthDates( this.props.year, this.props.month );
 
-		var daysMoment = _.map( days, function( daysInRow ) {
-			return _.map( daysInRow, function( date ) {
-				return moment( date );
+		var today = this.props.today;
+		var keyOfToday;
+
+		var daysMoment = _.map( days, function( daysInRow, row ) {
+
+			return _.map( daysInRow, function( date, col ) {
+
+				var m = moment( date );
+
+				if ( m.diff( today, 'days' ) === 0 ) {
+					keyOfToday = row * 7 + col;
+				}
+
+				return m;
 			} );
 		} );
 
@@ -71,12 +84,9 @@ var DatePicker = React.createClass( {
 
 		this.setState( {
 			days: daysMoment,
-			date: date
+			date: date,
+			keyOfSelectedDay: keyOfToday
 		} );
-	},
-
-	componentDidMount: function() {
-
 	},
 
 	formattedCalendarDate: function() {
@@ -84,7 +94,19 @@ var DatePicker = React.createClass( {
 		return ( this.state.date.format( 'MMMM' ) + ' ' + this.props.year );
 	},
 
-	renderRow: function( days, i ) {
+	onPressDay: function( key ) {
+
+		this.setState( {
+			keyOfSelectedDay: key
+		} );
+
+		var row = Math.floor( key / 7 );
+		var col = key % 7;
+		var day = this.state.days[ row ][ col ];
+		console.log( day );
+	},
+
+	renderRow: function( days, row ) {
 
 		var now = moment();
 		var thisMonth = this.state.date.month();
@@ -92,7 +114,10 @@ var DatePicker = React.createClass( {
 		var currentPeriods = this.props.currentPeriods;
 		var futurePeriods = this.props.futurePeriods;
 
-		var formattedDaysInRow = _.map( days, function( mdate, _i ) {
+		var formattedDaysInRow = _.map( days, function( mdate, col ) {
+
+			var key = row * 7 + col;
+			var isSelected = ( key === this.state.keyOfSelectedDay );
 
 			var isOtherMonthDay = ( mdate.month() !== thisMonth );
 
@@ -111,7 +136,8 @@ var DatePicker = React.createClass( {
 				styles.dayButton,
 				isCurrentPeriodDay ? styles.currentPeriodDay : null,
 				isFuturePeriodDay ? styles.futurePeriodDay : null,
-				isToday ? styles.today : null
+				isToday ? styles.today : null,
+				isSelected ? styles.selectedDay : null
 			];
 
 			var textStyle = [
@@ -120,14 +146,17 @@ var DatePicker = React.createClass( {
 			];
 
 			return (
-				<TouchableOpacity key={_i} style={style}>
-					<Text style={textStyle}>{mdate.date()}</Text>
-				</TouchableOpacity>
+				<TouchableWithoutFeedback key={key} onPress={this.onPressDay.bind(this, key)}>
+					<View style={style}>
+						<Text style={textStyle}>{mdate.date()}</Text>
+					</View>
+				</TouchableWithoutFeedback>
 			);
-		} );
+
+		}, this );
 
 		return (
-			<View key={i} style={styles.gridRow}>
+			<View key={row} style={styles.gridRow}>
 				{formattedDaysInRow}
 			</View>
 		);
@@ -165,7 +194,10 @@ var styles = StyleSheet.create( {
 	dayButton: {
 		flex: 1,
 		justifyContent: 'center',
-		alignItems: 'center',
+		alignItems: 'center'
+	},
+	selectedDay: {
+		backgroundColor: '#BEE2C2'
 	},
 	currentPeriodDay: {
 		backgroundColor: '#ff9999'

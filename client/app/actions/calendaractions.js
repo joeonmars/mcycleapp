@@ -39,3 +39,11 @@ module.exports.mergePeriods = function( id1, id2 ) {
 		id2: id2
 	};
 };
+
+
+module.exports.updateToday = function() {
+
+	return {
+		type: ActionTypes.UPDATE_TODAY
+	};
+};
