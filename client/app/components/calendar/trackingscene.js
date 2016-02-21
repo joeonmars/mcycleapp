@@ -101,10 +101,10 @@ var TrackingScene = React.createClass( {
 
 		var toggledStatus = !this.props.preferences.trackingCategories[ id ];
 
-		var status = {};
-		status[ id ] = toggledStatus;
+		var manifest = {};
+		manifest[ id ] = toggledStatus;
 
-		this.props.dispatch( PreferenceActions.changeTrackingCategories( status ) );
+		this.props.dispatch( PreferenceActions.changeTrackingCategories( manifest ) );
 	},
 
 	renderNavButtons: function( id ) {

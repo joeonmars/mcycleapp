@@ -25,22 +25,15 @@ var HomeScene = React.createClass( {
 	getInitialState: function() {
 
 		return {
-			calendarDates: null,
 			calendarIndex: 0,
-			shouldRender: false
+			shouldRender: false,
+			selectedDate: null
 		};
 	},
 
 	componentDidMount: function() {
 
 		InteractionManager.runAfterInteractions( this.onRunAfterInteractions );
-	},
-
-	onRunAfterInteractions: function() {
-
-		this.setState( {
-			shouldRender: true
-		} );
 	},
 
 	componentWillMount: function() {
@@ -69,12 +62,19 @@ var HomeScene = React.createClass( {
 			}
 		} );
 
-		var dataSource = ds.cloneWithRows( calendarDates );
+		this.dataSource = ds.cloneWithRows( calendarDates );
+		this.calendarDates = calendarDates;
 
 		this.setState( {
-			calendarDates: calendarDates,
 			calendarIndex: this.numPastMonths,
-			dataSource: dataSource
+			selectedDate: this.props.periods.today.start
+		} );
+	},
+
+	onRunAfterInteractions: function() {
+
+		this.setState( {
+			shouldRender: true
 		} );
 	},
 
@@ -109,10 +109,13 @@ var HomeScene = React.createClass( {
 	onScroll: function( e ) {
 
 		var calendarIndex = Math.round( e.nativeEvent.contentOffset.x / DEVICE_WIDTH );
+		var hasChanged = ( this.state.calendarIndex != calendarIndex );
 
-		this.setState( {
-			calendarIndex: calendarIndex
-		} );
+		if ( hasChanged ) {
+			this.setState( {
+				calendarIndex: calendarIndex
+			} );
+		}
 	},
 
 	onPressTrackButton: function( e ) {
@@ -121,7 +124,14 @@ var HomeScene = React.createClass( {
 		this.props.navigator.jumpTo( this.props.trackingRoute );
 	},
 
-	renderCalendar: function( date, i ) {
+	onDateSelected: function( date ) {
+
+		this.setState( {
+			selectedDate: date
+		} );
+	},
+
+	renderCalendar: function( date, sectionID, rowID ) {
 
 		var periods = this.props.periods;
 		var monthStart = date.clone().startOf( 'month' );
@@ -140,9 +150,10 @@ var HomeScene = React.createClass( {
 		} );
 
 		return (
-			<DatePicker key={i}
+			<DatePicker key={rowID}
 				year={date.year()} month={date.month()} today={todayStart}
-				currentPeriods={currentPeriods} futurePeriods={futurePeriods} />
+				currentPeriods={currentPeriods} futurePeriods={futurePeriods}
+				selectedDate={this.state.selectedDate} onDateSelected={this.onDateSelected} />
 		);
 	},
 
@@ -168,7 +179,7 @@ var HomeScene = React.createClass( {
 		if ( this.state.shouldRender ) {
 
 			var monthNames = moment.months();
-			var calendarDate = this.state.calendarDates[ this.state.calendarIndex ];
+			var calendarDate = this.calendarDates[ this.state.calendarIndex ];
 			var monthName = monthNames[ calendarDate.month() ];
 			var year = calendarDate.year();
 
@@ -178,14 +189,15 @@ var HomeScene = React.createClass( {
 
 			var dayIndex = this.props.periods.today.periodDayIndex + 1;
 			var nextPeriodStart = this.props.periods.future[ 0 ].start.format( 'MMMM DD' );
-
+			console.log( this.state.selectedDate )
 			return (
 				<View style={styles.main}>
 					<View style={styles.banner}>
 						<Text style={[styles.h1, styles.bannerText]}>Period Day <Text style={styles.digit}>{dayIndex}</Text></Text>
 						<Text style={[styles.h2, styles.bannerText]}>Next period starts {nextPeriodStart}</Text>
+
 						<View style={styles.trackButtonContainer}>
-							<TouchableOpacity style={styles.trackButton} onPress={this.onPressTrackButton}>
+							<TouchableOpacity style={styles.trackButton} onPress={this.state.selectedDate ? this.onPressTrackButton : null}>
 								<Icon style={styles.trackButtonText} name='pen' />
 							</TouchableOpacity>
 						</View>
@@ -213,7 +225,7 @@ var HomeScene = React.createClass( {
 
 					<ListView
 						ref='listView'
-						dataSource={this.state.dataSource}
+						dataSource={this.dataSource}
 						renderRow={this.renderCalendar}
 						initialListSize={1}
 						pagingEnabled={true}

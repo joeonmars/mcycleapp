@@ -29,7 +29,9 @@ var DatePicker = React.createClass( {
 		return {
 			year: now.year(),
 			month: now.month(),
-			today: null
+			today: null,
+			selectedDate: null,
+			onDateSelected: function() {}
 		};
 	},
 
@@ -38,7 +40,7 @@ var DatePicker = React.createClass( {
 		return {
 			days: null,
 			date: null,
-			keyOfSelectedDay: null
+			selectedDateKey: null
 		};
 	},
 
@@ -47,20 +49,9 @@ var DatePicker = React.createClass( {
 		var cal = new Calendar();
 		var days = cal.monthDates( this.props.year, this.props.month );
 
-		var today = this.props.today;
-		var keyOfToday;
-
 		var daysMoment = _.map( days, function( daysInRow, row ) {
-
 			return _.map( daysInRow, function( date, col ) {
-
-				var m = moment( date );
-
-				if ( m.diff( today, 'days' ) === 0 ) {
-					keyOfToday = row * 7 + col;
-				}
-
-				return m;
+				return moment( date );
 			} );
 		} );
 
@@ -81,12 +72,40 @@ var DatePicker = React.createClass( {
 		}
 
 		var date = moment( new Date( this.props.year, this.props.month ) );
+		var selectedDateKey = this.getDateKey( this.props.selectedDate, daysMoment );
 
 		this.setState( {
 			days: daysMoment,
 			date: date,
-			keyOfSelectedDay: keyOfToday
+			selectedDateKey: selectedDateKey
 		} );
+	},
+
+	componentWillReceiveProps: function( nextProps ) {
+
+		if ( this.props.selectedDate !== nextProps.selectedDate ) {
+
+			var selectedDateKey = this.getDateKey( nextProps.selectedDate, this.state.days );
+
+			this.setState( {
+				selectedDateKey: selectedDateKey
+			} );
+		}
+	},
+
+	getDateKey: function( date, mDates ) {
+
+		var key;
+
+		_.each( mDates, function( mInRow, row ) {
+			_.each( mInRow, function( m, col ) {
+				if ( m.diff( date, 'days' ) === 0 ) {
+					key = row * 7 + col;
+				}
+			} );
+		} );
+
+		return key;
 	},
 
 	formattedCalendarDate: function() {
@@ -97,13 +116,14 @@ var DatePicker = React.createClass( {
 	onPressDay: function( key ) {
 
 		this.setState( {
-			keyOfSelectedDay: key
+			selectedDateKey: key
 		} );
 
 		var row = Math.floor( key / 7 );
 		var col = key % 7;
 		var day = this.state.days[ row ][ col ];
-		console.log( day );
+
+		this.props.onDateSelected( day );
 	},
 
 	renderRow: function( days, row ) {
@@ -117,7 +137,7 @@ var DatePicker = React.createClass( {
 		var formattedDaysInRow = _.map( days, function( mdate, col ) {
 
 			var key = row * 7 + col;
-			var isSelected = ( key === this.state.keyOfSelectedDay );
+			var isSelected = ( key === this.state.selectedDateKey );
 
 			var isOtherMonthDay = ( mdate.month() !== thisMonth );
 

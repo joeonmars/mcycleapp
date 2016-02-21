@@ -145,12 +145,12 @@ var processPreferences = function( state = {}, action ) {
 
 		case ActionTypes.CHANGE_TRACKING_CATEGORIES:
 
-			var clonedStatus = _.clone( state.trackingCategories );
-			_.extend( clonedStatus, action.status );
+			var clonedManifest = _.clone( state.trackingCategories );
+			_.extend( clonedManifest, action.manifest );
 
 			var nextState = update( state, {
 				trackingCategories: {
-					$set: clonedStatus
+					$set: clonedManifest
 				}
 			} );
 
