@@ -16,9 +16,7 @@ var homeRoute = {
 	id: 'home'
 };
 
-var trackingRoute = {
-	id: 'tracking'
-};
+var trackingRoute = {};
 
 var initialRouteStack = [ homeRoute, trackingRoute ];
 
@@ -43,13 +41,15 @@ var CalendarScene = React.createClass( {
 			case 'home':
 				return (
 					<HomeScene navigator={nav} dispatch={this.props.dispatch}
-						trackingRoute={trackingRoute} periods={this.props.periods} hideMainNav={this.props.hideMainNav} />
+						periods={this.props.periods}
+						hideMainNav={this.props.hideMainNav} />
 				);
 
 			case 'tracking':
 				return (
 					<TrackingScene navigator={nav} dispatch={this.props.dispatch}
-						homeRoute={homeRoute} preferences={this.props.preferences} showMainNav={this.props.showMainNav} />
+						date={route.date} preferences={this.props.preferences}
+						homeRoute={homeRoute} showMainNav={this.props.showMainNav} />
 				);
 		}
 	},

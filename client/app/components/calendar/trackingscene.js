@@ -152,6 +152,8 @@ var TrackingScene = React.createClass( {
 					<Icon name='prev' />
 				</TouchableOpacity>
 
+				<Text>{this.props.date.format('MMMM DD')}</Text>
+
 				<View style={styles.navBar}>
 					<ScrollView style={styles.navScrollView}
 						pagingEnabled={true}
@@ -189,6 +191,8 @@ var TrackingScene = React.createClass( {
 var styles = StyleSheet.create( {
 	main: {
 		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
 		backgroundColor: '#FCFCFC'
 	},
 	navBar: {
