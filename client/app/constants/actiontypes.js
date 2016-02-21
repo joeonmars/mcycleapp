@@ -3,7 +3,8 @@ const ActionTypes = {
 	REMOVE_PERIOD: 'remove_period',
 	MODIFY_PERIOD: 'modify_period',
 	MERGE_PERIODS: 'merge_periods',
-	UPDATE_TODAY: 'update_today'
+	UPDATE_TODAY: 'update_today',
+	CHANGE_TRACKING_CATEGORIES: 'change_tracking_categories'
 };
 
 

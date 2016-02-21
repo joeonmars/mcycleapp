@@ -26,6 +26,20 @@ var initialState = {
 			periodId: null,
 			periodDayIndex: 0
 		}
+	},
+	preferences: {
+		trackingCategories: {
+			flow: true,
+			activity: false,
+			medicine: false,
+			symptom: false,
+			sleep: false,
+			mood: false,
+			love: false,
+			weight: false,
+			temperature: false,
+			travel: false
+		}
 	}
 };
 
@@ -125,13 +139,37 @@ var processPeriods = function( state = {}, action ) {
 };
 
 
+var processPreferences = function( state = {}, action ) {
+
+	switch ( action.type ) {
+
+		case ActionTypes.CHANGE_TRACKING_CATEGORIES:
+
+			var clonedStatus = _.clone( state.trackingCategories );
+			_.extend( clonedStatus, action.status );
+
+			var nextState = update( state, {
+				trackingCategories: {
+					$set: clonedStatus
+				}
+			} );
+
+			return nextState;
+
+		default:
+			return state;
+	}
+};
+
+
 /* The reducer is a pure function that takes the previous state and an action,
  * and returns the next state.
  * http://rackt.org/redux/docs/basics/Reducers.html
  */
 var reducer = combineReducers( {
 
-	periods: processPeriods
+	periods: processPeriods,
+	preferences: processPreferences
 
 } );
 

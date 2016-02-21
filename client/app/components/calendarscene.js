@@ -1,7 +1,6 @@
 var React = require( 'react-native' );
 
 var {
-	StyleSheet,
 	Navigator,
 	View
 } = React;
@@ -27,10 +26,6 @@ var initialRouteStack = [ homeRoute, trackingRoute ];
 // Define component
 var CalendarScene = React.createClass( {
 
-	componentWillMount: function() {
-
-	},
-
 	configureScene: function( route ) {
 
 		switch ( route.id ) {
@@ -46,10 +41,16 @@ var CalendarScene = React.createClass( {
 
 		switch ( route.id ) {
 			case 'home':
-				return <HomeScene navigator={nav} trackingRoute={trackingRoute} periods={this.props.periods} hideMainNav={this.props.hideMainNav} />
+				return (
+					<HomeScene navigator={nav} dispatch={this.props.dispatch}
+						trackingRoute={trackingRoute} periods={this.props.periods} hideMainNav={this.props.hideMainNav} />
+				);
 
 			case 'tracking':
-				return <TrackingScene navigator={nav} homeRoute={homeRoute} showMainNav={this.props.showMainNav} />
+				return (
+					<TrackingScene navigator={nav} dispatch={this.props.dispatch}
+						homeRoute={homeRoute} preferences={this.props.preferences} showMainNav={this.props.showMainNav} />
+				);
 		}
 	},
 
@@ -61,9 +62,6 @@ var CalendarScene = React.createClass( {
 		);
 	}
 } );
-
-
-var styles = StyleSheet.create( {} );
 
 
 module.exports = CalendarScene;

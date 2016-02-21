@@ -99,7 +99,8 @@ var MainScene = React.createClass( {
 			case 'calendar':
 			default:
 				return (
-					<CalendarScene navigator={nav} periods={this.props.periods}
+					<CalendarScene navigator={nav} dispatch={this.props.dispatch}
+						periods={this.props.periods} preferences={this.props.preferences}
 						showMainNav={this.showNav} hideMainNav={this.hideNav} />
 				);
 		}
@@ -203,7 +204,8 @@ var styles = StyleSheet.create( {
 function mapStateToProps( state ) {
 
 	return {
-		periods: state.periods
+		periods: state.periods,
+		preferences: state.preferences
 	};
 };
 

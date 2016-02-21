@@ -11,6 +11,7 @@ var {
 	TouchableWithoutFeedback
 } = React;
 
+var PreferenceActions = require( '../../actions' ).PreferenceActions;
 var Icon = require( '../icon' ).Icon;
 
 var moment = require( 'moment' );
@@ -98,11 +99,15 @@ var TrackingScene = React.createClass( {
 
 	onClickCategoryOption: function( id ) {
 
+		var toggledStatus = !this.props.preferences.trackingCategories[ id ];
+
+		var status = {};
+		status[ id ] = toggledStatus;
+
+		this.props.dispatch( PreferenceActions.changeTrackingCategories( status ) );
 	},
 
-	renderNavButtons: function( category ) {
-
-		var id = category.id;
+	renderNavButtons: function( id ) {
 
 		return (
 			<TouchableWithoutFeedback key={id} onPress={this.onClickNavButton.bind(this, id)}>
@@ -118,9 +123,12 @@ var TrackingScene = React.createClass( {
 		var id = category.id;
 		var text = category.text;
 
+		var activated = this.props.preferences.trackingCategories[ id ];
+		var buttonStyle = [ styles.optionButton, activated ? styles.activeOptionButton : null ];
+
 		return (
 			<TouchableWithoutFeedback key={id} onPress={this.onClickCategoryOption.bind(this, id)}>
-				<View style={styles.optionButton}>
+				<View style={buttonStyle}>
 					<Icon style={styles.optionIcon} name={id} />
 					<Text style={styles.optionText} numberOfLines={2}>{text.replace(' ', '\n')}</Text>
 				</View>
@@ -129,6 +137,10 @@ var TrackingScene = React.createClass( {
 	},
 
 	render: function() {
+
+		var activatedCategories = _.compact( _.map( this.props.preferences.trackingCategories, function( activated, key ) {
+			return activated ? key : null;
+		} ) );
 
 		var optionalCategories = _.filter( categories, function( category ) {
 			return category.optional;
@@ -146,7 +158,7 @@ var TrackingScene = React.createClass( {
 						horizontal={true}
 						showsHorizontalScrollIndicator={false}>
 
-			          	{categories.map(this.renderNavButtons)}
+			          	{activatedCategories.map(this.renderNavButtons)}
 
 				        <TouchableOpacity onPress={this.onClickAddButton}>
 							<View style={styles.navButton}>
@@ -223,6 +235,9 @@ var styles = StyleSheet.create( {
 		alignItems: 'center',
 		width: DEVICE_WIDTH / 3,
 		height: DEVICE_HEIGHT / 6
+	},
+	activeOptionButton: {
+		opacity: 0.4
 	},
 	optionIcon: {
 		color: '#000',
