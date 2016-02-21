@@ -188,9 +188,8 @@ var styles = StyleSheet.create( {
 		borderTopColor: '#979797'
 	},
 	navIcon: {
-		textAlign: 'center',
 		color: '#000',
-		fontSize: 18
+		fontSize: 20
 	},
 	currentIcon: {
 		color: '#979797'
